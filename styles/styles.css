@@ -1,0 +1,130 @@
+* { box-sizing: border-box; }
+:root { --barra-altura: 88px; }
+html, body { margin: 0; padding: 0; }
+body {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    background: #222;
+    color: #fff;
+    font: 16px/1.5 Arial, sans-serif;
+}
+header, footer {
+    position: relative;
+    isolation: isolate;
+    flex-shrink: 0;
+    width: 100%;
+    height: var(--barra-altura);
+    padding: 12px clamp(16px, 4vw, 64px);
+    display: flex;
+    align-items: center;
+    background-color: #1a1a1a;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 500 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M-10,120 Q50,20 120,40 T200,10' stroke='%23ff00ff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M100,-10 Q150,80 250,50 T350,90' stroke='%2300ffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3Cpath d='M400,120 Q350,40 300,30 T220,70' stroke='%2339ff14' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Cpath d='M520,10 Q450,50 420,20 T380,80' stroke='%23ff00ff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='120' cy='40' r='3' fill='%23ff00ff'/%3E%3Ccircle cx='250' cy='50' r='4' fill='%2300ffff'/%3E%3Ccircle cx='300' cy='30' r='2.5' fill='%2339ff14'/%3E%3Ccircle cx='420' cy='20' r='2' fill='%23ff00ff'/%3E%3Ccircle cx='30' cy='70' r='1.5' fill='%2300ffff'/%3E%3Ccircle cx='80' cy='20' r='1' fill='%2339ff14'/%3E%3Ccircle cx='180' cy='80' r='2' fill='%23ff00ff'/%3E%3Ccircle cx='220' cy='15' r='1.5' fill='%2300ffff'/%3E%3Ccircle cx='280' cy='85' r='1' fill='%23ff00ff'/%3E%3Ccircle cx='360' cy='25' r='2' fill='%2339ff14'/%3E%3Ccircle cx='450' cy='75' r='1.5' fill='%2300ffff'/%3E%3Ccircle cx='480' cy='40' r='2.5' fill='%2339ff14'/%3E%3Cpath d='M30,70 l15,-5' stroke='%2300ffff' stroke-width='1' fill='none'/%3E%3Cpath d='M180,80 l-10,15' stroke='%23ff00ff' stroke-width='1' fill='none'/%3E%3Cpath d='M360,25 l20,10' stroke='%2339ff14' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-size: auto 100%;
+}
+header { justify-content: space-between; gap: 12px; }
+header::before, footer::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: rgb(0 0 0 / 48%);
+    pointer-events: none;
+}
+header { border-bottom: 1px solid #6eefef55; }
+footer {
+    margin-top: auto;
+    justify-content: center;
+    text-align: center;
+    border-top: 1px solid #6eefef55;
+    font-size: 16px;
+    color: #eee;
+}
+.footer-frase { display: inline-block; margin-left: 12px; color: #8ae8e8; font-size: 14px; letter-spacing: .08em; }
+.logo a, .logo img { display: block; }
+.logo img { width: auto; height: 88px; object-fit: contain; border-radius: 0; }
+.accesos {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    border: 1px solid #ffffff30;
+    border-radius: 16px;
+    background: rgb(12 16 20 / 72%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    box-shadow: 0 8px 24px #0004, inset 0 1px 0 #ffffff15;
+}
+.accesos a { padding: 8px 14px; border-radius: 10px; color: #eee; font-size: 16px; text-decoration: none; }
+.accesos a:hover, .accesos a[aria-current="page"] { background: #ffffff18; color: #9ef5f5; }
+a:focus-visible, button:focus-visible { outline: 2px solid #9ef5f5; outline-offset: 3px; }
+.personal {
+    flex: 1;
+    width: min(100%, 1280px);
+    margin: 0 auto;
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+}
+.personal h1 { margin: 0; text-align: center; font-size: clamp(26px, 3vw, 38px); line-height: 1.2; font-weight: 600; }
+.tarjetas-personal { width: 100%; display: flex; justify-content: center; align-items: stretch; flex-wrap: wrap; gap: 20px; }
+.tarjeta-personal { flex: 0 1 220px; min-width: 0; overflow: hidden; border-radius: 14px; background: #fff; color: #1a1a1a; box-shadow: 0 8px 24px #0004; transition: transform .2s ease; }
+.foto-personal { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; }
+.info-personal { display: block; padding: 16px 12px; text-align: center; overflow-wrap: anywhere; }
+.nombre-personal { display: block; font-size: 17px; font-weight: 600; }
+.seleccionar-personal { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.seleccionar-personal:focus-visible { outline-offset: -4px; outline-color: #126464; }
+.ventana-personal { width: min(400px, calc(100% - 32px)); max-height: calc(100svh - 32px); padding: 24px; border: 1px solid #ffffff30; border-radius: 16px; background: #222; color: #eee; font: 16px/1.5 Arial, sans-serif; }
+.ventana-personal::backdrop { background: #0009; }
+.ventana-personal h2 { margin: 0 0 12px; font-size: 24px; }
+.ventana-personal p { margin: 0 0 20px; color: #ccc; }
+.ventana-personal button { padding: 10px 20px; border: 0; border-radius: 8px; font: inherit; cursor: pointer; }
+.servicios { width: min(100% - 48px, 1280px); margin: 0 auto; padding: 48px 0; }
+.servicios-intro { margin-bottom: 32px; text-align: center; }
+.servicios-intro h1 { margin: 0 0 8px; font-size: clamp(28px, 3vw, 40px); line-height: 1.2; }
+.servicios-intro p { margin: 0; color: #bbb; font-size: 17px; }
+.servicios .carousel { position: relative; }
+.carousel-inner { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.carousel-item { min-width: 0; margin: 0; overflow: hidden; border: 1px solid #ffffff20; border-radius: 16px; background: #191919; box-shadow: 0 8px 24px #0003; }
+.carousel-item[hidden] { display: none; }
+.carousel-item img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.servicios figcaption { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px; }
+.servicios figcaption h2 { margin: 0; font-size: 18px; font-weight: 500; }
+.servicios figcaption span { display: none; color: #bbb; font-size: 14px; }
+.carousel-control-prev, .carousel-control-next, .carousel-indicators { display: none; }
+@media (min-width: 1440px) { .carousel-inner { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (hover: hover) and (pointer: fine) { .tarjeta-personal:hover { transform: translateY(-5px); } }
+@media (max-width: 600px) {
+    :root { --barra-altura: 80px; }
+    header, footer { padding: 10px 12px; }
+    .logo img { width: auto; height: 52px; }
+    .accesos { gap: 0; padding: 4px; border-radius: 12px; }
+    .accesos a { padding: 9px 8px; font-size: 14px; }
+    footer { font-size: 14px; }
+    .footer-frase { font-size: 12px; margin-left: 8px; }
+    .personal { padding: 36px 16px; gap: 24px; }
+    .tarjetas-personal { gap: 16px; }
+    .tarjeta-personal { flex-basis: 240px; }
+    .servicios { width: min(100% - 32px, 440px); padding: 32px 0; }
+    .servicios-intro { margin-bottom: 24px; }
+    .carousel-inner { grid-template-columns: 1fr; gap: 0; }
+    .carousel-item img { height: min(110vw, 480px); aspect-ratio: auto; object-fit: contain; background: #111; }
+    .servicios figcaption span { display: inline; }
+    .carousel-control-prev, .carousel-control-next {
+        position: absolute; top: calc(min(110vw, 480px) / 2); transform: translateY(-50%);
+        display: grid; place-items: center; width: 44px; height: 48px;
+        padding: 0; border: 1px solid #ffffff40; border-radius: 10px; background: #111c;
+        color: #fff; font: 32px/1 Arial, sans-serif; cursor: pointer;
+    }
+    .carousel-control-prev { left: 10px; }
+    .carousel-control-next { right: 10px; }
+    .carousel-indicators { display: flex; justify-content: center; margin-top: 12px; }
+    .carousel-indicators button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+    .carousel-indicators button::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #666; }
+    .carousel-indicators button.active::after { background: #9ef5f5; }
+}
+@media (prefers-reduced-motion: reduce) { .tarjeta-personal { transition: none; } }
