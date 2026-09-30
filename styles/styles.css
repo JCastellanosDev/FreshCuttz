@@ -44,6 +44,9 @@ footer {
     color: #eee;
 }
 footer { animation-direction: reverse; }
+.redes-sociales { position: absolute; top: 50%; right: clamp(16px, 4vw, 64px); display: flex; align-items: center; transform: translateY(-50%); }
+.redes-sociales a { display: block; width: 52px; height: 52px; }
+.redes-sociales img { display: block; width: 100%; height: 100%; object-fit: contain; }
 @keyframes mover-lineas {
     from { background-position: 0 0; }
     to { background-position: 500px 0; }
@@ -93,7 +96,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid #d8a24e; outline-offs
 .foto-personal { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; }
 .info-personal { display: block; padding: 16px 12px; text-align: center; overflow-wrap: anywhere; }
 .nombre-personal { display: block; font-size: 17px; font-weight: 600; }
-.seleccionar-personal { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.seleccionar-personal { text-decoration: none; display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
 .seleccionar-personal:focus-visible { outline-offset: -4px; outline-color: #126464; }
 .ventana-personal { width: min(400px, calc(100% - 32px)); max-height: calc(100svh - 32px); padding: 24px; border: 1px solid #ffffff30; border-radius: 16px; background: #222; color: #eee; font: 16px/1.5 Arial, sans-serif; }
 .ventana-personal::backdrop { background: #0009; }
@@ -102,7 +105,24 @@ a:focus-visible, button:focus-visible { outline: 2px solid #d8a24e; outline-offs
 .ventana-personal button { padding: 10px 20px; border: 0; border-radius: 8px; font: inherit; cursor: pointer; }
 .servicios { width: min(100% - 48px, 1280px); margin: 0 auto; padding: 48px 0; }
 .servicios-intro { margin-bottom: 32px; text-align: center; }
-.servicios-intro h1 { margin: 0 0 8px; font-size: clamp(28px, 3vw, 40px); line-height: 1.2; }
+.servicios-intro h1 { display: flex; align-items: center; justify-content: center; gap: .45em; margin: 0 0 8px; font-size: clamp(28px, 3vw, 40px); line-height: 1.2; }
+.barber-pole {
+    display: block;
+    flex: 0 0 auto;
+    width: .42em;
+    height: 1.2em;
+    border: .04em solid #000;
+    border-radius: .6em;
+    overflow: hidden;
+    box-shadow: 0 .04em .11em rgb(0 0 0 / 50%), inset .03em 0 .04em rgb(255 255 255 / 15%), inset -.03em 0 .04em rgb(0 0 0 / 30%);
+    background: repeating-linear-gradient(-45deg, #fff 0 .36em, #d62d2d .36em .71em, #fff .71em 1.07em, #1e49ae 1.07em 1.43em);
+    background-size: 2em 2em;
+    animation: girarPoste 2s linear infinite;
+}
+@keyframes girarPoste {
+    from { background-position: 0 0; }
+    to { background-position: 0 2em; }
+}
 .servicios-intro p { margin: 0; color: #bbb; font-size: 17px; }
 .servicios .carousel { position: relative; }
 .carousel-inner { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
@@ -133,6 +153,8 @@ a:focus-visible, button:focus-visible { outline: 2px solid #d8a24e; outline-offs
     .accesos { gap: 0; padding: 4px; border-radius: 12px; }
     .accesos a { padding: 9px 8px; font-size: 14px; }
     footer { font-size: 14px; }
+    .redes-sociales { right: 12px; }
+    .redes-sociales a { width: 44px; height: 44px; }
     .footer-frase { font-size: 12px; margin-left: 8px; }
     .personal { padding: 36px 16px; gap: 24px; }
     .tarjetas-personal { gap: 16px; }
