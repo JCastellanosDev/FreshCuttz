@@ -1,0 +1,49 @@
+.contenedor-info{
+    width: auto;
+    height: 650px;
+    border: 2px solid white;
+    position: relative;
+}
+.contenedor-foto{
+    width: 600px;
+    height: 550px;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    margin-left: 20px; 
+    margin-top: 30px;
+    box-sizing: border-box;
+}
+.contenedor-barber{
+    width: 600px;
+    height: 550px;
+    border: 2px solid white;
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    border-radius: 50px;
+}
+.contenedor-barber h1{
+    text-align: center;
+    color:rgba(255, 140, 0, 0.666)
+}
+.contenedor-barber p{
+    text-align: center;
+    font-family: 50px;
+}
+
+.contenedor-foto img{
+    width: 72%;
+    justify-self: unset;
+    align-items: center ;
+    justify-items: center;
+    border-radius: 20px;
+}
+.contenedor-foto img:hover{
+    transform: scale(1.035);
+    filter: saturate(1.12);
+    box-shadow: 0 8px 24px rgba(248, 246, 246, 0.45);
+    transition: transform .35s ease, filter .35s ease, box-shadow .35s ease;
+    display: block;
+}

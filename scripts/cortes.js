@@ -1,8 +1,10 @@
 var cortes = [
     {nombre:"Axel sin barba",descripcion:"Antes",  precio:250, foto:"./image/cortes/antes.jpeg",id:1},
     {nombre:"Axel barbon",descripcion:"Despues", precio:250, foto:"./image/cortes/depues.jpeg", id:2},
-    {nombre:"Clean",descripcion:"ta chilo", precio:250, foto:"./image/cortes/corteM.jpg", id:3},
+    {nombre:"Axel barbon y largo",descripcion:"Mega despues", precio:250, foto:"./image/cortes/megaD.png", id:8},
     {nombre:"Nice",descripcion:"nice", precio:250, foto:"./image/cortes/cortesi.jpg", id:4},
+    {nombre:"Clean",descripcion:"ta chilo", precio:250, foto:"./image/cortes/corteM.jpg", id:7},
+    
     {nombre:"Ta chido",descripcion:"bien loquillo", precio:250, foto:"./image/cortes/dieñoAutor.jpg", id:5},
     {nombre:"Peloon",descripcion:"bien pelon mi compa", precio:250, foto:"./image/cortes/Pelon.jpg", id:6},
    
@@ -34,6 +36,8 @@ if (carrusel && cortes.length > 0) {
         const foto = document.createElement('img');
         foto.src = corte.foto;
         foto.alt = corte.nombre;
+        foto.loading = 'lazy';
+        foto.decoding = 'async';
 
         
         const informacion = document.createElement('figcaption');
