@@ -5,7 +5,7 @@ var cortes = [
     {nombre:"Nice",descripcion:"nice", precio:250, foto:"./image/cortes/cortesi.jpg", id:4},
     {nombre:"Clean",descripcion:"ta chilo", precio:250, foto:"./image/cortes/corteM.jpg", id:7},
     
-    {nombre:"Ta chido",descripcion:"bien loquillo", precio:250, foto:"./image/cortes/dieñoAutor.jpg", id:5},
+    {nombre:"Ta chido",descripcion:"bien loquillo", precio:250, foto:"./image/cortes/diseno-autor.jpg", id:5},
     {nombre:"Peloon",descripcion:"bien pelon mi compa", precio:250, foto:"./image/cortes/Pelon.jpg", id:6},
    
 
