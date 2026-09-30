@@ -1,9 +1,9 @@
 var personal =[
-    {nombre:"Mario      ''El güero'' ",descri:"Especializado en pintar cabello rosa", id:1,foto:"/image/personal/mario.jpg"},
-    {nombre:"Dany       ''El matute''",descri:"Mitad barbero mitad policia", id:2,foto:"/image/personal/dany.png"},
-    {nombre:"Cristian       ''La muñe''",descri:"Drogo te lo corta mejor", id:3,foto:"/image/personal/criss.png"},
-    {nombre:"Isziee         ''El isipisi''",descri:"Entre semana barbero y fines cevichero", id:4,foto:"/image/personal/isii.jpg"},
-    {nombre:"Mario      ''El grandpa''",descri:"El mas bueno pero el enojon", id:5,foto:"/image/personal/grampa.jpg"},];
+    {nombre:"Mario      ''El güero'' ",descri:"Especializado en pintar cabello rosa", id:1,foto:"/image/personal/mario-800.webp", fotoPequena:"/image/personal/mario-400.webp", ancho:800, alto:800},
+    {nombre:"Dany       ''El matute''",descri:"Mitad barbero mitad policia", id:2,foto:"/image/personal/dany-800.webp", fotoPequena:"/image/personal/dany-400.webp", ancho:800, alto:1010},
+    {nombre:"Cristian       ''La muñe''",descri:"Drogo te lo corta mejor", id:3,foto:"/image/personal/criss-800.webp", fotoPequena:"/image/personal/criss-400.webp", ancho:800, alto:1186},
+    {nombre:"Isziee         ''El isipisi''",descri:"Entre semana barbero y fines cevichero", id:4,foto:"/image/personal/isii-800.webp", fotoPequena:"/image/personal/isii-400.webp", ancho:800, alto:533},
+    {nombre:"Mario      ''El grandpa''",descri:"El mas bueno pero el enojon", id:5,foto:"/image/personal/grampa-800.webp", fotoPequena:"/image/personal/grampa-400.webp", ancho:800, alto:533},];
 
 
 const contenedorPersonal = document.getElementById('tarjetas-personal');
@@ -17,6 +17,10 @@ if (perfilBarbero) {
     document.getElementById('nombre-perfil').textContent = barbero.nombre;
     document.getElementById('descripcion-perfil').textContent = barbero.descri;
     const fotoPerfil = document.getElementById('foto-perfil');
+    fotoPerfil.width = barbero.ancho;
+    fotoPerfil.height = barbero.alto;
+    fotoPerfil.sizes = '(max-width: 700px) calc(100vw - 40px), (max-width: 1120px) 42vw, 454px';
+    fotoPerfil.srcset = `.${barbero.fotoPequena} 400w, .${barbero.foto} 800w`;
     fotoPerfil.src = '.' + barbero.foto;
     fotoPerfil.alt = `Retrato de ${barbero.nombre.trim()}`;
     document.getElementById('barbero-cita').textContent = barbero.nombre;
@@ -161,7 +165,13 @@ if (contenedorPersonal) {
 
         const foto = document.createElement('img');
 
-        foto.src = '.' + persona.foto;
+        foto.width = persona.ancho;
+        foto.height = persona.alto;
+        foto.loading = i === 0 ? 'eager' : 'lazy';
+        foto.decoding = 'async';
+        foto.sizes = '(max-width: 600px) 240px, 220px';
+        foto.srcset = `.${persona.fotoPequena} 400w, .${persona.foto} 800w`;
+        foto.src = '.' + persona.fotoPequena;
         foto.alt = persona.nombre;
         foto.className = 'foto-personal';
 
