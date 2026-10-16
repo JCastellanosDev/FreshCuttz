@@ -125,7 +125,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid #d8a24e; outline-offs
 }
 .servicios-intro p { margin: 0; color: #bbb; font-size: 17px; }
 .servicios .carousel { position: relative; }
-.carousel-inner { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.carousel-inner { display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px; }
 .carousel-item { min-width: 0; margin: 0; overflow: hidden; border: 1px solid #ffffff20; border-radius: 16px; background: #191919; box-shadow: 0 8px 24px #0003; }
 .carousel-item[hidden] { display: none; }
 .carousel-item img {

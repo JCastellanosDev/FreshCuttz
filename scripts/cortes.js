@@ -4,7 +4,6 @@ var cortes = [
     {nombre:"Axel barbon y largo",descripcion:"Mega despues", precio:250, foto:"./image/cortes/megaD.png", id:8},
     {nombre:"Nice",descripcion:"nice", precio:250, foto:"./image/cortes/cortesi.jpg", id:4},
     {nombre:"Clean",descripcion:"ta chilo", precio:250, foto:"./image/cortes/corteM.jpg", id:7},
-    
     {nombre:"Ta chido",descripcion:"bien loquillo", precio:250, foto:"./image/cortes/diseno-autor.jpg", id:5},
     {nombre:"Peloon",descripcion:"bien pelon mi compa", precio:250, foto:"./image/cortes/Pelon.jpg", id:6},
    
@@ -89,8 +88,10 @@ if (carrusel && cortes.length > 0) {
         }
     }
 
-    anterior.addEventListener('click', () => mostrarCorte(corteActual - 1));
-    siguiente.addEventListener('click', () => mostrarCorte(corteActual + 1));
+    anterior.addEventListener('click', () => 
+        mostrarCorte(corteActual - 1));
+    siguiente.addEventListener('click', () => 
+        mostrarCorte(corteActual + 1));
     carrusel.addEventListener('keydown', (evento) => {
         if (!pantallaMovil.matches) return;
         if (evento.key !== 'ArrowLeft' && evento.key !== 'ArrowRight') return;

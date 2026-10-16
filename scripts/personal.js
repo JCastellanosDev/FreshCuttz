@@ -1,7 +1,7 @@
 var personal =[
-    {nombre:"Mario      ''El güero'' ",descri:"Especializado en pintar cabello rosa", id:1,foto:"/image/personal/mario-800.webp", fotoPequena:"/image/personal/mario-400.webp", ancho:800, alto:800},
+    {nombre:"Mario      ''El guero'' ",descri:"Especializado en pintar cabello rosa", id:1,foto:"/image/personal/mario-800.webp", fotoPequena:"/image/personal/mario-400.webp", ancho:800, alto:800},
     {nombre:"Dany       ''El matute''",descri:"Mitad barbero mitad policia", id:2,foto:"/image/personal/dany-800.webp", fotoPequena:"/image/personal/dany-400.webp", ancho:800, alto:1010},
-    {nombre:"Cristian       ''La muñe''",descri:"Drogo te lo corta mejor", id:3,foto:"/image/personal/criss-800.webp", fotoPequena:"/image/personal/criss-400.webp", ancho:800, alto:1186},
+    {nombre:"Cristian       ''La mune''",descri:"Drogo te lo corta mejor", id:3,foto:"/image/personal/criss-800.webp", fotoPequena:"/image/personal/criss-400.webp", ancho:800, alto:1186},
     {nombre:"Isziee         ''El isipisi''",descri:"Entre semana barbero y fines cevichero", id:4,foto:"/image/personal/isii-800.webp", fotoPequena:"/image/personal/isii-400.webp", ancho:800, alto:533},
     {nombre:"Mario      ''El grandpa''",descri:"El mas bueno pero el enojon", id:5,foto:"/image/personal/grampa-800.webp", fotoPequena:"/image/personal/grampa-400.webp", ancho:800, alto:533},];
 
@@ -38,14 +38,14 @@ if (perfilBarbero) {
     const confirmar = document.getElementById('confirmar-cita');
     const volver = document.getElementById('volver-datos');
 
-    // Días de JavaScript: domingo = 0, lunes = 1, ..., sábado = 6.
+    
     const reglas = JSON.parse(document.getElementById('reglas-negocio').textContent);
     const horasInicio = [];
     for (let inicio = reglas.horaApertura; inicio + reglas.duracionCitaHoras <= reglas.horaCierre; inicio += reglas.duracionCitaHoras) {
         horasInicio.push(inicio);
     }
     const etiquetaHora = valor => `${valor % 12 || 12} ${valor < 12 ? 'a. m.' : 'p. m.'}`;
-    const nombresDias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const nombresDias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
     document.getElementById('horario-local').textContent = `Horario: ${reglas.diasAbiertos.map(dia => nombresDias[dia]).join(', ')}; de ${etiquetaHora(reglas.horaApertura)} a ${etiquetaHora(reglas.horaCierre)}.`;
 
     function actualizarHorarios() {
@@ -61,7 +61,7 @@ if (perfilBarbero) {
             return;
         }
         if (!reglas.diasAbiertos.includes(dia.getDay())) {
-            fecha.setCustomValidity('El local está cerrado ese día. Selecciona un día de lunes a sábado.');
+            fecha.setCustomValidity('El local esta cerrado ese dia. Selecciona un dia de lunes a sabado.');
             estado.textContent = fecha.validationMessage;
             hora.disabled = true;
             return;
@@ -73,7 +73,7 @@ if (perfilBarbero) {
         });
         hora.disabled = hora.options.length === 1;
         if (hora.disabled) {
-            fecha.setCustomValidity('No quedan horarios para esta fecha. Selecciona otro día.');
+            fecha.setCustomValidity('No quedan horarios para esta fecha. Selecciona otro dia.');
             estado.textContent = fecha.validationMessage;
         } else if (Array.from(hora.options).some(opcion => opcion.value === anterior)) {
             hora.value = anterior;
@@ -118,7 +118,7 @@ if (perfilBarbero) {
         document.body.classList.add('cita-abierta');
     });
     document.getElementById('cerrar-cita').addEventListener('click', () => modal.close());
-    // El backdrop nativo dirige sus eventos al dialog; distinguimos su área visible.
+    
     modal.addEventListener('click', event => {
         const limites = modal.getBoundingClientRect();
         if (event.target === modal && (
@@ -126,7 +126,7 @@ if (perfilBarbero) {
             event.clientY < limites.top || event.clientY > limites.bottom
         )) modal.close();
     });
-    // También se ejecuta cuando el usuario cierra con Escape.
+    
     modal.addEventListener('close', () => {
         document.body.classList.remove('cita-abierta');
         abrir.focus();
@@ -146,7 +146,7 @@ if (perfilBarbero) {
             hora.reportValidity();
             return;
         }
-        estado.textContent = `Has seleccionado una cita con ${barbero.nombre.trim()} para el ${seleccion.toLocaleDateString('es-MX')}, de ${hora.selectedOptions[0].textContent}. Aún no se ha enviado ni reservado.`;
+        estado.textContent = `Has seleccionado una cita con ${barbero.nombre.trim()} para el ${seleccion.toLocaleDateString('es-MX')}, de ${hora.selectedOptions[0].textContent}. Aun no se ha enviado ni reservado.`;
     });
 }
 
@@ -159,7 +159,7 @@ if (contenedorPersonal) {
         const tarjeta = document.createElement('article');
         tarjeta.className = 'tarjeta-personal';
         const seleccionar = document.createElement('a');
-        seleccionar.href = `personal.html?id=${persona.id}`;
+        seleccionar.href = `./personal.php?id=${encodeURIComponent(persona.id)}`;
         seleccionar.className = 'seleccionar-personal';
         seleccionar.setAttribute('aria-label', `Ver perfil de ${persona.nombre}`);
 
