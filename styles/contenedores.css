@@ -4,13 +4,16 @@
     margin: 0 auto;
     padding: clamp(24px, 5vw, 64px) 20px;
 }
+.seundo-ingo{
+    padding-bottom: 100px;
+}
 .contenedor-info {
     display: flex;
     overflow: hidden;
-    border: 1px solid #383838;
+    border: 1px solid #6eefef55;
     border-radius: 24px;
     background: #191919;
-    box-shadow: 0 20px 60px #0005;
+    box-shadow: 0 20px 60px #0005, 0 0 24px #6eefef08;
 }
 .contenedor-foto { flex: 0 0 42%; min-width: 0; background: #222; }
 .contenedor-foto img {
@@ -29,15 +32,16 @@
     align-items: flex-start;
     justify-content: center;
     padding: clamp(24px, 4vw, 48px);
+    background: radial-gradient(ellipse at top right, #6eefef0a, transparent 65%);
     overflow-wrap: anywhere;
 }
-.perfil-etiqueta { margin: 0 0 16px; color: #ec9c01; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.perfil-etiqueta { margin: 0 0 16px; color: #6eefef; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
 .contenedor-barber h1 { margin: 0 0 20px; font-size: clamp(30px, 4vw, 48px); line-height: 1.12; }
-.perfil-descripcion { margin: 0; color: #ccc; font-size: 18px; }
-.perfil-servicios { width: 100%; margin: 28px 0; padding-top: 24px; border-top: 1px solid #ffffff20; }
+.perfil-descripcion { margin: 0; color: #c3d1d1; font-size: 18px; }
+.perfil-servicios { width: 100%; margin: 28px 0; padding-top: 24px; border-top: 1px solid #6eefef25; }
 .perfil-servicios h2 { margin: 0 0 12px; font-size: 18px; }
-.perfil-servicios ul { min-height: 32px; margin: 0; padding-left: 22px; color: #ccc; list-style: disc; }
-.perfil-servicios li::marker { color: #ec9c01; }
+.perfil-servicios ul { min-height: 32px; margin: 0; padding-left: 22px; color: #c3d1d1; list-style: disc; }
+.perfil-servicios li::marker { color: #6eefef; }
 .boton-cita {
     display: inline-flex;
     align-items: center;
@@ -45,14 +49,16 @@
     gap: 24px;
     min-height: 48px;
     padding: 13px 24px;
-    border: 1px solid #e0b56b;
+    border: 1px solid #6eefef80;
     border-radius: 10px;
-    background: #e0b56b;
-    color: #15110b;
+    background: #6eefef;
+    color: #102020;
     font: 700 16px/1.4 Arial, sans-serif;
     cursor: pointer;
+    transition: background .2s ease, box-shadow .2s ease;
 }
-.boton-cita:hover { background: #f1c985; }
+.boton-cita:hover { background: #a0ffff; box-shadow: 0 0 18px #6eefef26; }
+.perfil-personal button:focus-visible, .modal-cita button:focus-visible { outline: 2px solid #6eefef; outline-offset: 3px; }
 body.cita-abierta { overflow: hidden; }
 .modal-cita {
     position: fixed;
@@ -62,30 +68,34 @@ body.cita-abierta { overflow: hidden; }
     margin: auto;
     padding: 32px;
     overflow-y: auto;
-    border: 1px solid #000;
+    border: 1px solid #6eefef55;
     border-radius: 20px;
     background: #191919;
     color: #fff;
-    box-shadow: 0 24px 80px #0009;
+    box-shadow: 0 24px 80px #0009, 0 0 24px #6eefef15;
 }
 .modal-cita::backdrop { background: rgb(0 0 0 / 75%); }
-.modal-cita h2 { margin: 0 36px 12px 0; font-size: 28px; color: #ec9c01; }
+.modal-cita h2 { margin: 0 36px 12px 0; font-size: 28px; color: #f4ffff; }
 .modal-cita .perfil-etiqueta { padding-right: 36px; }
-.modal-cita #detalle-cita { color: #ccc; }
-.cerrar-cita { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border: 0; border-radius: 8px; background: transparent; color: #fff; font-size: 30px; cursor: pointer; }
-.cerrar-cita:hover { background: #ffffff15; }
+.modal-cita #detalle-cita { color: #c3d1d1; }
+.cerrar-cita { position: absolute; top: 12px; right: 12px; width: 44px; height: 44px; border: 1px solid #6eefef55; border-radius: 10px; background: rgb(12 16 20 / 72%); color: #eee; font-size: 30px; cursor: pointer; }
+.cerrar-cita:hover { background: #6eefef20; border-color: #6eefef; }
 #formulario-cita { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
 #formulario-cita label { font-weight: 700; }
-#formulario-cita input, #formulario-cita select { min-width: 0; width: 100%; min-height: 48px; margin-bottom: 8px; padding: 12px; border: 1px solid #666; border-radius: 8px; background: #101010; color: #fff; font: inherit; color-scheme: dark; }
-#formulario-cita input:focus-visible, #formulario-cita select:focus-visible { outline: 2px solid #ec9c01; outline-offset: 2px; }
+#formulario-cita input, #formulario-cita select { min-width: 0; width: 100%; min-height: 48px; margin-bottom: 8px; padding: 12px; border: 1px solid #6eefef55; border-radius: 8px; background: #101010; color: #fff; font: inherit; color-scheme: dark; }
+#formulario-cita input:focus-visible, #formulario-cita select:focus-visible { outline: 2px solid #6eefef; outline-offset: 2px; }
 #formulario-cita fieldset { display: flex; flex-direction: column; gap: 10px; min-width: 0; margin: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 #formulario-cita [hidden] { display: none; }
+#formulario-cita .ayuda-campo { margin: -4px 0 8px; color: #b4c2c2; font-size: 13px; }
+#formulario-cita .error-campo { margin: -4px 0 8px; color: #ffb4b4; font-size: 14px; }
+#formulario-cita .error-campo:empty { display: none; }
+#formulario-cita input[aria-invalid="true"] { border-color: #ffb4b4; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.paso-cita { margin: 0 0 8px; color: #ccc; font-size: 14px; }
-#volver-datos { min-height: 44px; padding: 10px 16px; border: 1px solid #444; border-radius: 8px; background: #101010; color: #ddd; font: inherit; cursor: pointer; }
-#volver-datos:hover { background: #292929; }
-.aviso-cita { margin: 0 0 8px; color: #aaa; font-size: 13px; }
-#estado-cita { margin: 0; color: #ddd; overflow-wrap: anywhere; }
+.paso-cita { margin: 0 0 8px; color: #6eefef; font-size: 14px; }
+#volver-datos { min-height: 44px; padding: 10px 16px; border: 1px solid #6eefef55; border-radius: 8px; background: #101010; color: #6eefef; font: inherit; cursor: pointer; }
+#volver-datos:hover { background: #6eefef15; border-color: #6eefef; }
+.aviso-cita { margin: 0 0 8px; color: #b4c2c2; font-size: 13px; }
+#estado-cita { margin: 0; color: #c3d1d1; overflow-wrap: anywhere; }
 #estado-cita:empty { display: none; }
 @media (max-width: 700px) {
     .contenedor-info { flex-direction: column; }
@@ -93,4 +103,7 @@ body.cita-abierta { overflow: hidden; }
     .contenedor-foto img { height: auto; min-height: 0; max-height: 480px; aspect-ratio: 4 / 3; }
     .contenedor-barber .boton-cita { width: 100%; }
     .modal-cita { padding: 28px 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .boton-cita { transition: none; }
 }

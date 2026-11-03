@@ -5,6 +5,69 @@ var personal =[
     {nombre:"Isziee         ''El isipisi''",descri:"Entre semana barbero y fines cevichero", id:4,foto:"/image/personal/isii-800.webp", fotoPequena:"/image/personal/isii-400.webp", ancho:800, alto:533},
     {nombre:"Mario      ''El grandpa''",descri:"El mas bueno pero el enojon", id:5,foto:"/image/personal/grampa-800.webp", fotoPequena:"/image/personal/grampa-400.webp", ancho:800, alto:533},];
 
+var productos=[
+    // Cambia null por la cantidad disponible de cada producto.
+    {nombre:"cera", precio:250, cantidadDisponible:null, id:1, foto:"./image/productos/cera-sin-fondo.png"},
+    {nombre:"Suavecito", precio:120, cantidadDisponible:null, id:2, foto:"./image/productos/sua-sin-fondo.png"},
+    {nombre:"CeraGel", precio:300, cantidadDisponible:null, id:3, foto:"./image/productos/ceraGel-sin-fondo.png"},
+    {nombre:"Mousse", precio:100, cantidadDisponible:null, id:5, foto:"./image/productos/mousse-sin-fondo.png"},
+    {nombre:"Pomada", precio:70, cantidadDisponible:null, id:6, foto:"./image/productos/pomada-sin-fondo.png"},
+    {nombre:"Crema", precio:80, cantidadDisponible:null, id:7, foto:"./image/productos/crema-sin-fondo.png"},
+];
+
+const contenedorProductos = document.getElementById('tarjetas-productos');
+
+if (contenedorProductos) {
+    contenedorProductos.replaceChildren();
+    const formatoPrecio = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+    window.carritoCompras?.actualizarCatalogo(productos);
+
+    productos.forEach(producto => {
+        const tarjeta = document.createElement('article');
+        tarjeta.className = 'tarjeta-producto';
+
+        const foto = document.createElement('img');
+        foto.className = 'foto-producto';
+        foto.src = producto.foto;
+        foto.alt = producto.nombre;
+        foto.loading = 'lazy';
+        foto.decoding = 'async';
+
+        const informacion = document.createElement('div');
+        informacion.className = 'info-producto';
+
+        const nombre = document.createElement('h2');
+        nombre.textContent = producto.nombre;
+
+        const precio = document.createElement('p');
+        precio.className = 'precio-producto';
+        precio.textContent = `Precio: ${formatoPrecio.format(producto.precio)}`;
+
+        const cantidad = document.createElement('p');
+        cantidad.className = 'cantidad-producto';
+        cantidad.textContent = `Cantidad disponible: ${producto.cantidadDisponible ?? 'Por definir'}`;
+
+        const agregar = document.createElement('button');
+        agregar.type = 'button';
+        agregar.className = 'agregar-carrito';
+        agregar.setAttribute('aria-label', `Agregar ${producto.nombre} al carrito`);
+        const actualizarBoton = () => {
+            const enCarrito = window.carritoCompras?.cantidad(producto.id) ?? 0;
+            const agotado = producto.cantidadDisponible !== null && enCarrito >= producto.cantidadDisponible;
+            agregar.disabled = agotado;
+            agregar.textContent = agotado
+                ? (producto.cantidadDisponible === 0 ? 'Agotado' : 'Máximo disponible en carrito')
+                : 'Agregar al carrito';
+        };
+        agregar.addEventListener('click', () => window.carritoCompras?.agregar(producto));
+        document.addEventListener('carrito:actualizado', actualizarBoton);
+        actualizarBoton();
+
+        informacion.append(nombre, precio, cantidad, agregar);
+        tarjeta.append(foto, informacion);
+        contenedorProductos.appendChild(tarjeta);
+    });
+}
 
 const contenedorPersonal = document.getElementById('tarjetas-personal');
 
@@ -37,6 +100,43 @@ if (perfilBarbero) {
     const paso = document.getElementById('paso-cita');
     const confirmar = document.getElementById('confirmar-cita');
     const volver = document.getElementById('volver-datos');
+    const formulario = document.getElementById('formulario-cita');
+    const nombreCliente = document.getElementById('nombre-cliente');
+    const telefonoCliente = document.getElementById('telefono-cliente');
+
+    function validarDatosCliente(campo) {
+        const valor = campo.value.normalize('NFC');
+        let mensaje = '';
+        if (campo === nombreCliente) {
+            if (!valor.trim()) {
+                mensaje = 'Escribe tu nombre.';
+            } else if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+$/.test(valor)) {
+                mensaje = 'El nombre solo permite letras, acentos, ñ y espacios. No uses números ni símbolos.';
+            } else if (valor.trim().length < 2 || valor.length > 100) {
+                mensaje = 'El nombre debe tener entre 2 y 100 caracteres, sin contar los espacios de los extremos.';
+            }
+        } else if (!valor) {
+            mensaje = 'Escribe tu teléfono.';
+        } else if (!/^[0-9]+$/.test(valor)) {
+            mensaje = 'El teléfono solo permite números del 0 al 9, sin espacios, letras ni signos.';
+        } else if (valor.length !== 10) {
+            mensaje = 'El teléfono debe tener exactamente 10 números, sin lada internacional.';
+        }
+        campo.setCustomValidity(mensaje);
+        campo.setAttribute('aria-invalid', String(Boolean(mensaje)));
+        document.getElementById(campo === nombreCliente ? 'error-nombre' : 'error-telefono').textContent = mensaje;
+        return !mensaje;
+    }
+
+    // Validamos explícitamente para mostrar los mismos avisos al escribir y al continuar.
+    formulario.noValidate = true;
+    [nombreCliente, telefonoCliente].forEach(campo => {
+        campo.addEventListener('input', () => validarDatosCliente(campo));
+        campo.addEventListener('blur', () => {
+            if (campo === nombreCliente) campo.value = campo.value.normalize('NFC').trim();
+            validarDatosCliente(campo);
+        });
+    });
 
     
     const reglas = JSON.parse(document.getElementById('reglas-negocio').textContent);
@@ -131,8 +231,18 @@ if (perfilBarbero) {
         document.body.classList.remove('cita-abierta');
         abrir.focus();
     });
-    document.getElementById('formulario-cita').addEventListener('submit', event => {
+    formulario.addEventListener('submit', event => {
         event.preventDefault();
+        nombreCliente.value = nombreCliente.value.normalize('NFC').trim();
+        const nombreValido = validarDatosCliente(nombreCliente);
+        const telefonoValido = validarDatosCliente(telefonoCliente);
+        if (!nombreValido || !telefonoValido) {
+            mostrarHorario(false);
+            const campoInvalido = nombreValido ? telefonoCliente : nombreCliente;
+            campoInvalido.focus();
+            campoInvalido.reportValidity();
+            return;
+        }
         if (horario.hidden) {
             mostrarHorario(true);
             fecha.focus();
@@ -146,7 +256,25 @@ if (perfilBarbero) {
             hora.reportValidity();
             return;
         }
-        estado.textContent = `Has seleccionado una cita con ${barbero.nombre.trim()} para el ${seleccion.toLocaleDateString('es-MX')}, de ${hora.selectedOptions[0].textContent}. Aun no se ha enviado ni reservado.`;
+        const fechaTexto = seleccion.toLocaleDateString('es-MX');
+        const horaTexto = hora.selectedOptions[0].textContent;
+        modal.close();
+        window.carritoCompras?.abrirPago({
+            total: reglas.precioCorte,
+            resumen: {
+                'Cita con': barbero.nombre.trim(),
+                'Fecha': fechaTexto,
+                'Hora': horaTexto,
+                'Precio del corte': new Intl.NumberFormat('es-MX', {
+                    style: 'currency',
+                    currency: 'MXN'
+                }).format(reglas.precioCorte)
+            }
+        });
+    });
+
+    window.addEventListener('cita:pago-confirmado', ({ detail }) => {
+        estado.textContent = `Cita reservada con ${detail['Cita con']} para el ${detail.Fecha}, ${detail.Hora}. Método de pago: ${detail.metodo}.`;
     });
 }
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,15 +27,13 @@
 
       overflow: hidden;
 
-      /* Efecto de profundidad */
       box-shadow:
-        0 10px 25px rgba(0,0,0,.5),
-        inset 8px 0 10px rgba(255,255,255,.15),
-        inset -8px 0 10px rgba(0,0,0,.3);
+        0 10px 25px rgba(0, 0, 0, .5),
+        inset 8px 0 10px rgba(255, 255, 255, .15),
+        inset -8px 0 10px rgba(0, 0, 0, .3);
 
       background:
-        repeating-linear-gradient(
-          -45deg,
+        repeating-linear-gradient(-45deg,
           #ffffff 0px,
           #ffffff 25px,
 
@@ -45,8 +44,7 @@
           #ffffff 75px,
 
           #1e49ae 75px,
-          #0a1bb6 100px
-        );
+          #0a1bb6 100px);
 
       background-size: 140px 140px;
 
@@ -70,4 +68,5 @@
   <div class="barber-pole"></div>
 
 </body>
+
 </html>
