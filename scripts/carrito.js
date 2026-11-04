@@ -223,21 +223,82 @@
     });
     document.getElementById('cerrar-pago').addEventListener('click', () => modalPago.close());
     document.getElementById('volver-carrito').addEventListener('click', () => modalPago.close());
-    formularioPago.addEventListener('submit', (evento) => {
+    const estadoPago = document.getElementById('pago-estado');
+    const confirmacionPago = document.getElementById('pago-confirmacion');
+    const textoConfirmacion = document.getElementById('pago-confirmacion-texto');
+    const botonConfirmar = formularioPago.querySelector('button[type="submit"]');
+    const instrucciones = {
+        efectivo: 'Paga en la barbería.',
+        transferencia: 'Envía tu comprobante de transferencia a la barbería indicando tu número de pedido.',
+        'mercado-pago': 'Te contactaremos para enviarte el enlace de Mercado Pago.'
+    };
+
+    modalPago.addEventListener('close', () => {
+        formularioPago.hidden = false;
+        confirmacionPago.hidden = true;
+        estadoPago.textContent = '';
+    });
+    document.getElementById('pago-listo').addEventListener('click', () => {
+        modalPago.close();
+        window.location.href = 'index.php';
+    });
+
+    formularioPago.addEventListener('submit', async (evento) => {
         evento.preventDefault();
+        if (botonConfirmar.disabled) return;
         if ((!articulos.length && !contextoPago) || !formularioPago.reportValidity()) return;
         const opcion = formularioPago.querySelector('input[name="metodo-pago"]:checked');
         if (!opcion) return;
         const metodos = { efectivo: 'Efectivo', transferencia: 'Transferencia', 'mercado-pago': 'Mercado Pago' };
         const metodo = metodos[opcion.value];
-        if (contextoPago) {
-            window.dispatchEvent(new CustomEvent('cita:pago-confirmado', {
-                detail: { ...contextoPago, metodo }
-            }));
+        const esCita = Boolean(contextoPago?.cita);
+        const cuerpo = esCita
+            ? { tipo: 'cita', metodo: opcion.value, ...contextoPago.cita }
+            : { tipo: 'productos', metodo: opcion.value, articulos: articulos.map(({ id, cantidad }) => ({ id, cantidad })) };
+
+        estadoPago.textContent = '';
+        botonConfirmar.disabled = true;
+        botonConfirmar.textContent = 'Registrando…';
+        try {
+            const respuesta = await fetch('api/pedido.php', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(cuerpo)
+            });
+            const datos = await respuesta.json().catch(() => ({}));
+            if (!respuesta.ok) {
+                estadoPago.textContent = datos.error || 'No se pudo registrar tu pedido. Intenta de nuevo.';
+                if (datos.requiereLogin) {
+                    // El carrito se conserva; al iniciar sesión la página se recarga y puede pagar.
+                    modalPago.close();
+                    // Cerramos el carrito para que el login no quede detrás de otro diálogo modal.
+                    animacion?.cancel();
+                    panel.close();
+                    estado.textContent = datos.error;
+                    document.getElementById('abrir-perfil')?.click();
+                    document.getElementById('login-estado').textContent = datos.error;
+                }
+                return;
+            }
+            if (esCita) {
+                window.dispatchEvent(new CustomEvent('cita:pago-confirmado', { detail: { ...contextoPago.resumen, metodo } }));
+            } else {
+                articulos = [];
+                actualizar();
+            }
+            contextoPago = null;
+            textoConfirmacion.textContent = `${esCita ? 'Tu cita quedó reservada' : 'Tu pedido quedó registrado'} con el folio #${datos.pedido.id}. ` +
+                `Total: ${formatoPrecio.format(datos.pedido.total)} · ${datos.pedido.metodo}. ${instrucciones[opcion.value]}`;
+            formularioPago.hidden = true;
+            confirmacionPago.hidden = false;
+            document.getElementById('pago-listo').focus();
+        } catch {
+            estadoPago.textContent = 'No hay conexión con el servidor. Revisa que XAMPP esté encendido.';
+        } finally {
+            botonConfirmar.disabled = false;
+            botonConfirmar.textContent = 'Confirmar pago';
         }
-        contextoPago = null;
-        modalPago.close();
-        window.location.href = 'index.php';
     });
 
     const cerrar = async () => {

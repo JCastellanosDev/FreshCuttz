@@ -203,6 +203,11 @@ html.carrito-abierto, html.carrito-abierto body { overflow: hidden; }
 .pago-volver { width: 100%; min-height: 44px; margin-top: 10px; padding: 10px; border: 0; border-radius: 10px; background: transparent; color: #6eefef; font: inherit; cursor: pointer; }
 .pago-volver:hover { background: #6eefef0d; }
 .modal-pago :focus-visible { outline: 2px solid #6eefef; outline-offset: 4px; }
+.pago-estado { margin: 0 0 12px; color: #ffb4b4; font-size: 14px; }
+.pago-estado:empty { display: none; }
+.pago-confirmacion { padding-top: 20px; }
+.pago-confirmacion h3 { margin: 0 0 8px; color: #6eefef; font-size: 22px; }
+.pago-confirmacion p { margin: 0 0 20px; color: #c3d1d1; line-height: 1.6; }
 .personal {
     flex: 1;
     width: min(100%, 1280px);
@@ -395,7 +400,7 @@ html.login-abierto, html.login-abierto body { overflow: hidden; }
 .login-ayuda { margin: 0 0 6px; color: #bbb; font-size: 13px; }
 .login-error { margin: 0 0 8px; color: #ffb4b4; font-size: 14px; }
 .login-error:empty, #login-estado:empty { display: none; }
-#login-estado { margin: 4px 0 0; color: #ccc; font-size: 14px; }
+#login-estado { margin: 4px 0 0; color: #ffb4b4; font-size: 14px; }
 .modal-login :focus-visible, .boton-perfil:focus-visible { outline: 2px solid #ddd; outline-offset: 3px; }
 @media (max-width: 600px) {
     .accesos { flex-wrap: wrap; justify-content: center; max-width: 100%; }

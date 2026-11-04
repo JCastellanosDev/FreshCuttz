@@ -24,10 +24,44 @@
             // La página sigue funcionando si el navegador bloquea el almacenamiento.
         }
     }
+    const API_CUENTA = 'api/cuenta.php';
+
+    function guardarNombre(usuario) {
+        try {
+            if (usuario?.nombre) sessionStorage.setItem('freshcuttz-nombre', usuario.nombre);
+            else sessionStorage.removeItem('freshcuttz-nombre');
+        } catch {
+            // Sin almacenamiento solo se pierde el saludo; la sesión vive en el servidor.
+        }
+    }
+
+    // La sesión real está en PHP; sincronizamos el saludo con lo que diga el servidor.
+    async function sincronizarSesion() {
+        try {
+            const respuesta = await fetch(API_CUENTA, { credentials: 'same-origin' });
+            if (respuesta.ok) guardarNombre((await respuesta.json()).usuario);
+        } catch {
+            // Si el servidor no responde, mostramos el último estado conocido.
+        }
+        actualizarPerfil();
+    }
+
     actualizarPerfil();
+    sincronizarSesion();
     window.addEventListener('pageshow', actualizarPerfil);
-    cerrarSesion?.addEventListener('click', () => {
-        sessionStorage.removeItem('freshcuttz-nombre');
+    cerrarSesion?.addEventListener('click', async () => {
+        cerrarSesion.disabled = true;
+        try {
+            await fetch(API_CUENTA, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accion: 'salir' })
+            });
+        } catch {
+            // Aunque falle la red, limpiamos el saludo local.
+        }
+        guardarNombre(null);
         actualizarPerfil();
         window.location.href = 'index.php';
     });
@@ -41,9 +75,24 @@
     const descripcion = document.getElementById('descripcion-login');
     if (!abrir || !modal || !formulario) return;
     const descripcionInicial = descripcion.textContent;
+    const titulo = document.getElementById('titulo-login');
+    const enviar = formulario.querySelector('button[type="submit"]');
+    let modo = 'registro';
+
+    function cambiarModo(nuevoModo) {
+        modo = nuevoModo;
+        const esLogin = modo === 'login';
+        titulo.textContent = esLogin ? 'Iniciar sesión' : 'Crear cuenta';
+        enviar.textContent = esLogin ? 'Iniciar sesión' : 'Crear cuenta';
+        descripcion.textContent = esLogin
+            ? 'Ingresa el nombre y el teléfono de tu cuenta para continuar.'
+            : descripcionInicial;
+        tengoCuenta.hidden = esLogin;
+    }
+
     tengoCuenta.addEventListener('click', () => {
-        descripcion.textContent = 'Ingresa el nombre y el teléfono de tu cuenta para continuar.';
-        tengoCuenta.hidden = true;
+        cambiarModo('login');
+        estado.textContent = '';
         nombre.focus();
     });
 
@@ -99,8 +148,7 @@
             event.clientY < borde.top || event.clientY > borde.bottom)) modal.close();
     });
     modal.addEventListener('close', () => {
-        descripcion.textContent = descripcionInicial;
-        tengoCuenta.hidden = false;
+        cambiarModo('registro');
         formulario.reset();
         [nombre, telefono].forEach(campo => {
             campo.setCustomValidity('');
@@ -123,8 +171,9 @@
             mostrar.setAttribute('aria-label', 'Ocultar contraseña');
         }
     });
-    formulario.addEventListener('submit', event => {
+    formulario.addEventListener('submit', async event => {
         event.preventDefault();
+        if (enviar.disabled) return;
         nombre.value = nombre.value.normalize('NFC').trim();
         const nombreValido = validar(nombre);
         const telefonoValido = validar(telefono);
@@ -136,13 +185,32 @@
             return;
         }
         ocultarClave();
+        const textoBoton = enviar.textContent;
+        enviar.disabled = true;
+        enviar.textContent = modo === 'login' ? 'Entrando…' : 'Creando cuenta…';
         try {
-            // Guardamos solo el nombre para el saludo, no credenciales ni una sesión autenticada.
-            sessionStorage.setItem('freshcuttz-nombre', nombre.value);
+            const respuesta = await fetch(API_CUENTA, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accion: modo, nombre: nombre.value, telefono: telefono.value })
+            });
+            const datos = await respuesta.json().catch(() => ({}));
+            if (!respuesta.ok) {
+                estado.textContent = datos.error || 'No se pudo completar. Intenta de nuevo.';
+                const campo = datos.campo === 'nombre' ? nombre : datos.campo === 'telefono' ? telefono : null;
+                campo?.focus();
+                return;
+            }
+            guardarNombre(datos.usuario);
             telefono.value = '';
-            window.location.href = 'index.php';
+            // Recargamos la misma página para no perder lo que estaba haciendo (por ejemplo, pagar el carrito).
+            window.location.reload();
         } catch {
-            estado.textContent = 'Permite el almacenamiento de este sitio en tu navegador para continuar.';
+            estado.textContent = 'No hay conexión con el servidor. Revisa que XAMPP esté encendido.';
+        } finally {
+            enviar.disabled = false;
+            enviar.textContent = textoBoton;
         }
     });
 })();

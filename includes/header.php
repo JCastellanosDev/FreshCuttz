@@ -51,7 +51,7 @@ $hojasEstiloAdicionales = $hojasEstiloAdicionales ?? [];
             <button class="carrito-cerrar" id="cerrar-login" type="button"
                 aria-label="Cerrar inicio de sesión">×</button>
         </div>
-        <h2 id="titulo-login">Iniciar sesión</h2>
+        <h2 id="titulo-login">Crear cuenta</h2>
         <p id="descripcion-login">Ingresa tu nombre y utiliza tu número de teléfono como contraseña.</p>
         <form id="formulario-login" method="post">
             <label for="login-nombre">Nombre</label>
@@ -70,7 +70,7 @@ $hojasEstiloAdicionales = $hojasEstiloAdicionales ?? [];
             </div>
             <p class="login-ayuda" id="login-ayuda-telefono"></p>
             <p class="login-error" id="login-error-telefono" aria-live="polite"></p>
-            <button class="carrito-continuar" type="submit">Iniciar sesión</button>
+            <button class="carrito-continuar" type="submit">Crear cuenta</button>
             <button class="login-cuenta" id="ya-tengo-cuenta" type="button">Ya tengo cuenta</button>
             <p id="login-estado" role="status" aria-live="polite"></p>
         </form>
@@ -131,7 +131,13 @@ $hojasEstiloAdicionales = $hojasEstiloAdicionales ?? [];
                     <span><strong>Mercado Pago</strong><small id="detalle-mercado-pago"></small></span>
                 </label>
             </fieldset>
+            <p class="pago-estado" id="pago-estado" role="alert"></p>
             <button class="carrito-continuar" type="submit">Confirmar pago</button>
             <button class="pago-volver" id="volver-carrito" type="button">Volver al carrito</button>
         </form>
+        <div class="pago-confirmacion" id="pago-confirmacion" role="status" hidden>
+            <h3>¡Listo!</h3>
+            <p id="pago-confirmacion-texto"></p>
+            <button class="carrito-continuar" id="pago-listo" type="button">Volver al inicio</button>
+        </div>
     </dialog>

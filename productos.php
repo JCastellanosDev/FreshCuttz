@@ -18,8 +18,16 @@ $resenas = [
         'texto' => 'Excelentes personas y buenos cortes de pelo y atención.',
     ],
 ];
+require_once __DIR__ . '/includes/negocio.php';
+try {
+    $catalogo = productosActivos();
+} catch (PDOException $e) {
+    error_log('FreshCuttz catálogo: ' . $e->getMessage());
+    $catalogo = [];
+}
 require __DIR__ . '/includes/header.php';
 ?>
+<script id="catalogo-productos" type="application/json"><?= json_encode($catalogo, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?></script>
 <main class="servicios">
     <details class="servicios-desplegable">
         <summary class="servicios-intro">

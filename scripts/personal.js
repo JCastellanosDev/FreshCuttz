@@ -5,20 +5,25 @@ var personal =[
     {nombre:"Isziee         ''El isipisi''",descri:"Entre semana barbero y fines cevichero", id:4,foto:"/image/personal/isii-800.webp", fotoPequena:"/image/personal/isii-400.webp", ancho:800, alto:533},
     {nombre:"Mario      ''El grandpa''",descri:"El mas bueno pero el enojon", id:5,foto:"/image/personal/grampa-800.webp", fotoPequena:"/image/personal/grampa-400.webp", ancho:800, alto:533},];
 
-var productos=[
-    // Cambia null por la cantidad disponible de cada producto.
-    {nombre:"cera", precio:250, cantidadDisponible:null, id:1, foto:"./image/productos/cera-sin-fondo.png"},
-    {nombre:"Suavecito", precio:120, cantidadDisponible:null, id:2, foto:"./image/productos/sua-sin-fondo.png"},
-    {nombre:"CeraGel", precio:300, cantidadDisponible:null, id:3, foto:"./image/productos/ceraGel-sin-fondo.png"},
-    {nombre:"Mousse", precio:100, cantidadDisponible:null, id:5, foto:"./image/productos/mousse-sin-fondo.png"},
-    {nombre:"Pomada", precio:70, cantidadDisponible:null, id:6, foto:"./image/productos/pomada-sin-fondo.png"},
-    {nombre:"Crema", precio:80, cantidadDisponible:null, id:7, foto:"./image/productos/crema-sin-fondo.png"},
-];
+// Los productos vienen de la base de datos (productos.php los imprime en #catalogo-productos).
+// Se administran desde el panel: /admin
+var productos = [];
+try {
+    productos = JSON.parse(document.getElementById('catalogo-productos')?.textContent || '[]');
+} catch {
+    productos = [];
+}
 
 const contenedorProductos = document.getElementById('tarjetas-productos');
 
 if (contenedorProductos) {
     contenedorProductos.replaceChildren();
+    if (!productos.length) {
+        const aviso = document.createElement('p');
+        aviso.className = 'cantidad-producto';
+        aviso.textContent = 'Por ahora no hay productos disponibles.';
+        contenedorProductos.append(aviso);
+    }
     const formatoPrecio = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
     window.carritoCompras?.actualizarCatalogo(productos);
 
@@ -169,6 +174,7 @@ if (perfilBarbero) {
         horasInicio.forEach(inicio => {
             const valor = `${String(inicio).padStart(2, '0')}:00`;
             if (new Date(`${fecha.value}T${valor}`) <= new Date()) return;
+            if (ocupadas.fecha === fecha.value && ocupadas.horas.has(valor)) return;
             hora.append(new Option(`${etiquetaHora(inicio)} a ${etiquetaHora(inicio + reglas.duracionCitaHoras)}`, valor));
         });
         hora.disabled = hora.options.length === 1;
@@ -180,6 +186,22 @@ if (perfilBarbero) {
         }
     }
 
+    // Horarios ya reservados con este barbero (los consulta en la base de datos).
+    let ocupadas = { fecha: '', horas: new Set() };
+    async function cargarOcupadas() {
+        const consultada = fecha.value;
+        if (!consultada) return;
+        try {
+            const respuesta = await fetch(`api/citas.php?barbero=${encodeURIComponent(barbero.id)}&fecha=${encodeURIComponent(consultada)}`);
+            const datos = respuesta.ok ? await respuesta.json() : { ocupadas: [] };
+            if (fecha.value !== consultada) return;
+            ocupadas = { fecha: consultada, horas: new Set(datos.ocupadas || []) };
+        } catch {
+            // Sin conexión mostramos todos los horarios; el servidor rechaza los ocupados al confirmar.
+        }
+        if (fecha.value === consultada && !horario.hidden) actualizarHorarios();
+    }
+
     function mostrarHorario(visible) {
         datos.hidden = visible;
         datos.disabled = visible;
@@ -189,7 +211,10 @@ if (perfilBarbero) {
         paso.textContent = visible ? 'Paso 2 de 2 · Fecha y hora' : 'Paso 1 de 2 · Tus datos';
         confirmar.textContent = visible ? 'Confirmar' : 'Continuar';
         estado.textContent = '';
-        if (visible) actualizarHorarios();
+        if (visible) {
+            actualizarHorarios();
+            cargarOcupadas();
+        }
     }
 
     function actualizarFechaMinima() {
@@ -204,6 +229,7 @@ if (perfilBarbero) {
     fecha.addEventListener('input', () => {
         estado.textContent = '';
         actualizarHorarios();
+        cargarOcupadas();
     });
     hora.addEventListener('change', () => {
         hora.setCustomValidity('');
@@ -261,6 +287,13 @@ if (perfilBarbero) {
         modal.close();
         window.carritoCompras?.abrirPago({
             total: reglas.precioCorte,
+            cita: {
+                barbero_id: barbero.id,
+                fecha: fecha.value,
+                hora: hora.value,
+                nombre: nombreCliente.value,
+                telefono: telefonoCliente.value
+            },
             resumen: {
                 'Cita con': barbero.nombre.trim(),
                 'Fecha': fechaTexto,

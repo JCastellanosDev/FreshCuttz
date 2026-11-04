@@ -2,17 +2,17 @@
 $tituloPagina = 'Personal';
 $mostrarNavegacion = false;
 $hojasEstiloAdicionales = ['./styles/contenedores.css?v=' . filemtime(__DIR__ . '/styles/contenedores.css')];
+require_once __DIR__ . '/includes/negocio.php';
+$reglasNegocio = [
+    'diasAbiertos' => DIAS_ABIERTOS,
+    'horaApertura' => HORA_APERTURA,
+    'horaCierre' => HORA_CIERRE,
+    'duracionCitaHoras' => DURACION_CITA_HORAS,
+    'precioCorte' => precioCorte(),
+];
 require __DIR__ . '/includes/header.php';
 ?>
-<script id="reglas-negocio" type="application/json">
-    {
-        "diasAbiertos": [1, 2, 3, 4, 5, 6],
-        "horaApertura": 10,
-        "horaCierre": 20,
-        "duracionCitaHoras": 1,
-        "precioCorte": 250
-    }
-    </script>
+<script id="reglas-negocio" type="application/json"><?= json_encode($reglasNegocio) ?></script>
 <script src="scripts/personal.js?v=<?= filemtime(__DIR__ . '/scripts/personal.js') ?>" defer></script>
 <main class="perfil-personal">
     <article class="contenedor-info" id="perfil-barbero" aria-labelledby="nombre-perfil">
