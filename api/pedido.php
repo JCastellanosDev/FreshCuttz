@@ -1,6 +1,7 @@
 <?php
 // Registra compras de productos y pagos de citas de corte.
-session_start();
+require_once __DIR__ . '/../includes/sesion.php';
+abrirSesion();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../includes/negocio.php';

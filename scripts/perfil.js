@@ -1,7 +1,72 @@
+// Menú de navegación móvil (botón con aria-expanded que despliega #nav-principal).
+(() => {
+    const botonMenu = document.getElementById('boton-menu');
+    const nav = document.getElementById('nav-principal');
+    if (!botonMenu || !nav) return;
+    const escritorio = window.matchMedia('(min-width: 900px)');
+
+    const alternar = (abrir) => {
+        botonMenu.setAttribute('aria-expanded', String(abrir));
+        botonMenu.setAttribute('aria-label', abrir ? 'Cerrar menú' : 'Abrir menú');
+        nav.classList.toggle('esta-abierta', abrir);
+    };
+
+    botonMenu.addEventListener('click', () => {
+        const abrir = botonMenu.getAttribute('aria-expanded') !== 'true';
+        alternar(abrir);
+        if (abrir) nav.querySelector('a')?.focus();
+    });
+    document.addEventListener('keydown', (evento) => {
+        if (evento.key === 'Escape' && nav.classList.contains('esta-abierta')) {
+            alternar(false);
+            botonMenu.focus();
+        }
+    });
+    document.addEventListener('click', (evento) => {
+        if (nav.classList.contains('esta-abierta') && !nav.contains(evento.target) && !botonMenu.contains(evento.target)) {
+            alternar(false);
+        }
+    });
+    nav.addEventListener('focusout', (evento) => {
+        if (!escritorio.matches && evento.relatedTarget && !nav.contains(evento.relatedTarget) &&
+            !botonMenu.contains(evento.relatedTarget)) alternar(false);
+    });
+    escritorio.addEventListener('change', () => alternar(false));
+})();
+
 (() => {
     const bienvenida = document.getElementById('bienvenida-perfil');
     const abrir = document.getElementById('abrir-perfil');
     const cerrarSesion = document.getElementById('cerrar-sesion');
+    const CLAVE_AVISO = 'freshcuttz-aviso';
+
+    const cerrarDialogo = (dialogo) => window.ui?.cerrarDialogo
+        ? window.ui.cerrarDialogo(dialogo)
+        : (dialogo.open && dialogo.close(), Promise.resolve());
+    const avisar = (mensaje, tipo) => window.ui?.toast(mensaje, tipo);
+    const cargando = (control, activo) => {
+        if (window.ui?.cargando) window.ui.cargando(control, activo);
+        else control.disabled = activo;
+    };
+
+    // Un aviso que debe sobrevivir a la recarga (login) o a la navegación (cerrar sesión).
+    function avisarDespues(mensaje) {
+        try {
+            sessionStorage.setItem(CLAVE_AVISO, mensaje);
+        } catch {
+            // Sin almacenamiento simplemente no se muestra el aviso.
+        }
+    }
+    try {
+        const pendiente = sessionStorage.getItem(CLAVE_AVISO);
+        if (pendiente) {
+            sessionStorage.removeItem(CLAVE_AVISO);
+            avisar(pendiente, 'exito');
+        }
+    } catch {
+        // Sin almacenamiento no hay avisos pendientes.
+    }
+
     function actualizarPerfil() {
         if (abrir) abrir.hidden = false;
         if (cerrarSesion) cerrarSesion.hidden = true;
@@ -50,7 +115,7 @@
     sincronizarSesion();
     window.addEventListener('pageshow', actualizarPerfil);
     cerrarSesion?.addEventListener('click', async () => {
-        cerrarSesion.disabled = true;
+        cargando(cerrarSesion, true);
         try {
             await fetch(API_CUENTA, {
                 method: 'POST',
@@ -58,13 +123,17 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ accion: 'salir' })
             });
+            avisarDespues('Cerraste sesión. ¡Vuelve pronto!');
         } catch {
             // Aunque falle la red, limpiamos el saludo local.
+            avisar('Sin conexión con el servidor; cerramos tu sesión en este navegador.', 'error');
         }
         guardarNombre(null);
         actualizarPerfil();
+        cargando(cerrarSesion, false);
         window.location.href = 'index.php';
     });
+
     const modal = document.getElementById('modal-login');
     const formulario = document.getElementById('formulario-login');
     const nombre = document.getElementById('login-nombre');
@@ -117,9 +186,15 @@
         return !mensaje;
     }
 
+    function iconoClave(visible) {
+        const nuevo = window.ui?.icono(visible ? 'ojo-cerrado' : 'ojo');
+        if (nuevo) mostrar.replaceChildren(nuevo);
+        else mostrar.textContent = visible ? 'Ocultar' : 'Mostrar';
+    }
+
     function ocultarClave() {
         telefono.type = 'password';
-        mostrar.textContent = 'Mostrar';
+        iconoClave(false);
         mostrar.setAttribute('aria-pressed', 'false');
         mostrar.setAttribute('aria-label', 'Mostrar contraseña');
     }
@@ -136,16 +211,21 @@
         });
     });
     abrir.addEventListener('click', () => {
+        if (modal.open) return;
         modal.showModal();
         abrir.setAttribute('aria-expanded', 'true');
         document.documentElement.classList.add('login-abierto');
         nombre.focus();
     });
-    document.getElementById('cerrar-login').addEventListener('click', () => modal.close());
+    document.getElementById('cerrar-login').addEventListener('click', () => cerrarDialogo(modal));
+    modal.addEventListener('cancel', event => {
+        event.preventDefault();
+        cerrarDialogo(modal);
+    });
     modal.addEventListener('click', event => {
         const borde = modal.getBoundingClientRect();
         if (event.target === modal && (event.clientX < borde.left || event.clientX > borde.right ||
-            event.clientY < borde.top || event.clientY > borde.bottom)) modal.close();
+            event.clientY < borde.top || event.clientY > borde.bottom)) cerrarDialogo(modal);
     });
     modal.addEventListener('close', () => {
         cambiarModo('registro');
@@ -166,7 +246,7 @@
         if (telefono.type === 'text') ocultarClave();
         else {
             telefono.type = 'text';
-            mostrar.textContent = 'Ocultar';
+            iconoClave(true);
             mostrar.setAttribute('aria-pressed', 'true');
             mostrar.setAttribute('aria-label', 'Ocultar contraseña');
         }
@@ -185,32 +265,34 @@
             return;
         }
         ocultarClave();
-        const textoBoton = enviar.textContent;
-        enviar.disabled = true;
-        enviar.textContent = modo === 'login' ? 'Entrando…' : 'Creando cuenta…';
+        const modoEnvio = modo;
+        cargando(enviar, true);
         try {
             const respuesta = await fetch(API_CUENTA, {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accion: modo, nombre: nombre.value, telefono: telefono.value })
+                body: JSON.stringify({ accion: modoEnvio, nombre: nombre.value, telefono: telefono.value })
             });
             const datos = await respuesta.json().catch(() => ({}));
             if (!respuesta.ok) {
                 estado.textContent = datos.error || 'No se pudo completar. Intenta de nuevo.';
                 const campo = datos.campo === 'nombre' ? nombre : datos.campo === 'telefono' ? telefono : null;
                 campo?.focus();
+                cargando(enviar, false);
                 return;
             }
             guardarNombre(datos.usuario);
             telefono.value = '';
+            const saludo = datos.usuario?.nombre ? `, ${datos.usuario.nombre}` : '';
+            avisarDespues(modoEnvio === 'login' ? `¡Hola de nuevo${saludo}!` : `Cuenta creada. ¡Bienvenido${saludo}!`);
             // Recargamos la misma página para no perder lo que estaba haciendo (por ejemplo, pagar el carrito).
+            // El botón se queda en estado de carga hasta que la página cambia.
             window.location.reload();
         } catch {
             estado.textContent = 'No hay conexión con el servidor. Revisa que XAMPP esté encendido.';
-        } finally {
-            enviar.disabled = false;
-            enviar.textContent = textoBoton;
+            avisar('Sin conexión con el servidor.', 'error');
+            cargando(enviar, false);
         }
     });
 })();

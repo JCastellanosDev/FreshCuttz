@@ -1,0 +1,49 @@
+{
+	frankenphp
+}
+
+# Vercel termina HTTPS y reenvía por HTTP al puerto PORT (80 por defecto).
+:{$PORT:80} {
+	root * /app
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	header /fonts/* Cache-Control "public, max-age=31536000, immutable"
+	header /image/* Cache-Control "public, max-age=604800"
+
+	# Orden explícito: primero lo privado, luego fotos en MySQL, luego PHP y archivos.
+	route {
+		# Código interno y archivos de configuración: nunca se sirven.
+		@privado path /includes/* /db/* /docker/* /Caddyfile /Dockerfile /.*
+		respond @privado 404
+
+		# Fotos subidas desde el panel: viven en MySQL (el disco del contenedor es temporal).
+		@subidas {
+			path /image/productos/producto-*
+			not file
+		}
+		rewrite @subidas /imagen.php
+
+		# /admin → /admin/
+		@carpeta {
+			file {path}/index.php
+			not path */
+		}
+		redir @carpeta {path}/ 308
+
+		# Sin respaldo a index.php: una ruta que no existe responde 404.
+		@existe file {
+			try_files {path} {path}/index.php
+			split_path .php
+		}
+		rewrite @existe {http.matchers.file.relative}
+
+		@php path *.php
+		php @php
+		file_server
+	}
+}

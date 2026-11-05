@@ -1,0 +1,242 @@
+/* ==========================================================================
+   Fresh Cuttz · Perfil del barbero y modal de cita (personal.php)
+   Usa los tokens y componentes de sistema.css.
+   ========================================================================== */
+
+.perfil {
+    display: block;
+    width: min(100% - 2 * var(--margen-pagina), var(--ancho-max));
+    margin-inline: auto;
+    padding: var(--esp-6) 0 var(--esp-24);
+}
+.perfil-volver { margin: 0 0 var(--esp-6) calc(-1 * var(--esp-3)); color: var(--texto-2); }
+.perfil-volver:hover { color: var(--texto); }
+.perfil-volver .icono { transition: translate var(--dur) var(--curva-salida); }
+.perfil-volver:hover .icono { translate: -2px 0; }
+
+/* ---------- Composición editorial ---------- */
+.perfil-barbero {
+    display: grid;
+    gap: var(--esp-8);
+}
+.perfil-foto {
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radio-xl);
+    background: var(--superficie-2);
+    box-shadow: var(--sombra-3);
+    animation: aparecer var(--dur-lenta) var(--curva-salida) both;
+}
+.perfil-foto img { width: 100%; height: 100%; object-fit: cover; }
+
+.perfil-info {
+    display: grid;
+    align-content: start;
+    gap: var(--esp-6);
+    min-width: 0;
+    animation: subir var(--dur-lenta) var(--curva-salida) 60ms both;
+}
+.perfil-nombre {
+    display: grid;
+    gap: var(--esp-2);
+    font-size: clamp(3.5rem, 2rem + 7vw, 6rem);
+    line-height: 0.88;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+}
+.perfil-apodo {
+    font-size: 0.5em;
+    font-weight: 750;
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--primario);
+}
+.perfil-apodo::before { content: "\201C"; }
+.perfil-apodo::after { content: "\201D"; }
+.perfil-esqueleto-nombre { display: block; width: 70%; height: 1em; }
+
+.perfil-descripcion {
+    max-width: 40ch;
+    font-size: var(--texto-xl);
+    line-height: 1.4;
+    color: var(--texto-2);
+}
+
+.perfil-detalles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--esp-4) var(--esp-6);
+    padding-block: var(--esp-5);
+    border-block: 1px solid var(--borde);
+}
+.perfil-detalles dt {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-2);
+    margin-bottom: var(--esp-1);
+    font-size: var(--texto-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--texto-3);
+}
+.perfil-detalles dt .icono { color: var(--primario); }
+.perfil-detalles dd { margin: 0; font-size: var(--texto-lg); font-weight: 650; }
+.sin-corte { white-space: nowrap; }
+
+.perfil-servicios { display: grid; gap: var(--esp-4); }
+.perfil-servicios h2 { font-size: var(--texto-2xl); }
+.servicios-lista {
+    display: grid;
+    gap: var(--esp-3);
+    padding: 0;
+    list-style: none;
+}
+.servicios-lista li {
+    display: flex;
+    align-items: center;
+    gap: var(--esp-3);
+    color: var(--texto);
+}
+.servicios-lista .icono {
+    box-sizing: content-box;
+    padding: var(--esp-1);
+    border-radius: 50%;
+    background: var(--primario-suave);
+    color: var(--primario);
+}
+
+.perfil-cta { width: 100%; margin-top: var(--esp-2); }
+
+@media (min-width: 900px) {
+    .perfil { padding-top: var(--esp-8); }
+    .perfil-barbero {
+        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+        gap: var(--esp-16);
+        align-items: start;
+    }
+    .perfil-foto {
+        position: sticky;
+        top: var(--esp-6);
+        max-height: calc(100svh - 2 * var(--esp-6));
+    }
+    .perfil-info { padding-top: var(--esp-8); }
+    .perfil-cta { width: auto; justify-self: start; padding-inline: var(--esp-10); }
+}
+
+/* ---------- Otros barberos ---------- */
+.otros-barberos {
+    display: grid;
+    gap: var(--esp-6);
+    margin-top: var(--esp-20);
+    padding-top: var(--esp-10);
+    border-top: 1px solid var(--borde);
+}
+.otros-barberos h2 { font-size: var(--texto-4xl); }
+.otros-lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--esp-6) var(--esp-4);
+    padding: 0;
+    list-style: none;
+}
+@media (min-width: 720px) {
+    .otros-lista { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--esp-6); }
+}
+.otro-barbero {
+    display: grid;
+    gap: var(--esp-3);
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radio-lg);
+    transition: scale var(--dur-rapida) var(--curva-estandar);
+}
+.otro-barbero:active { scale: 0.98; }
+.otro-barbero:focus-visible { outline-offset: 4px; border-radius: var(--radio-lg); }
+.otro-barbero img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radio-lg);
+    background: var(--superficie-2);
+    filter: grayscale(0.6) brightness(0.85);
+    transition: filter var(--dur-lenta) var(--curva-salida);
+}
+.otro-nombre {
+    display: grid;
+    gap: 2px;
+    font-size: var(--texto-2xl);
+    font-weight: 800;
+    font-stretch: var(--ancho-display);
+    text-transform: uppercase;
+    line-height: 1;
+    overflow-wrap: anywhere;
+}
+.otro-apodo {
+    font-size: var(--texto-sm);
+    font-weight: 600;
+    font-stretch: 100%;
+    text-transform: none;
+    line-height: 1.3;
+    color: var(--texto-2);
+    transition: color var(--dur) var(--curva-estandar);
+}
+.otro-apodo::before { content: "\201C"; }
+.otro-apodo::after { content: "\201D"; }
+.otro-barbero:focus-visible img { filter: none; }
+@media (hover: hover) and (pointer: fine) {
+    .otro-barbero:hover img { filter: none; }
+    .otro-barbero:hover .otro-apodo { color: var(--primario-hover); }
+}
+
+/* ---------- Modal de cita ---------- */
+body.cita-abierta { overflow: hidden; }
+
+.dialogo-cita { padding: var(--esp-6); }
+.dialogo-cita .dialogo-cabecera { align-items: center; margin-bottom: var(--esp-2); }
+.dialogo-cita .dialogo-cabecera .btn-icono { margin-right: calc(-1 * var(--esp-2)); }
+.cita-detalle { color: var(--texto-2); }
+.cita-detalle strong { color: var(--texto); font-weight: 650; }
+
+.cita-formulario { display: grid; gap: var(--esp-6); margin-top: var(--esp-6); }
+
+.cita-pasos { display: grid; gap: var(--esp-2); }
+.cita-progreso { display: flex; gap: var(--esp-2); }
+.cita-progreso span {
+    flex: 1;
+    height: 4px;
+    border-radius: var(--radio-pill);
+    background: var(--borde);
+    transition: background-color var(--dur-lenta) var(--curva-salida);
+}
+.cita-formulario[data-paso="1"] .cita-progreso span:first-child,
+.cita-formulario[data-paso="2"] .cita-progreso span { background: var(--primario); }
+.cita-paso { font-size: var(--texto-sm); font-weight: 600; color: var(--texto-2); }
+
+.cita-fieldset {
+    display: grid;
+    gap: var(--esp-5);
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    animation: subir var(--dur) var(--curva-salida);
+}
+
+.hora-control { position: relative; }
+.hora-esqueleto {
+    position: absolute;
+    inset: 0;
+    display: none;
+    pointer-events: none;
+}
+.campo-hora.esta-cargando .hora-esqueleto { display: block; }
+.campo-hora.esta-cargando select { opacity: 0; }
+
+.cita-acciones { display: grid; gap: var(--esp-2); }
+
+.cita-estado { font-size: var(--texto-sm); color: var(--texto-2); overflow-wrap: anywhere; }
+.cita-estado:empty { display: none; }
+
+@media (max-width: 479px) {
+    .dialogo-cita { padding: var(--esp-5); }
+}

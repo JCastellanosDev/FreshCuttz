@@ -1,0 +1,11 @@
+.git
+.gitignore
+.vercel
+.env*
+.DS_Store
+**/.DS_Store
+**/.htaccess
+db/
+Dockerfile
+.dockerignore
+DEPLOY.md

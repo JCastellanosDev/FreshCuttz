@@ -5,66 +5,89 @@ $claseBody = 'pagina-contacto';
 $hojasEstiloAdicionales = ['./styles/contacto.css?v=' . filemtime(__DIR__ . '/styles/contacto.css')];
 require __DIR__ . '/includes/header.php';
 ?>
-<main class="seccion-contacto">
-    <div class="tarjetas-info">
-        <div class="tarjeta-mini">
-            <h3>Direccion</h3>
-            <a href="https://maps.app.goo.gl/LEtbziQ2he6aUzBK7" target="_blank" rel="noopener noreferrer">
-                Av. Industrias, Chihuahua, Chih., 31136
-            </a>
+<main id="contenido" class="contacto contenedor">
+    <div class="contacto-info">
+        <header class="contacto-cabecera">
+            <h1>Pasa a la silla</h1>
+            <p class="contacto-intro">Estamos sobre Av. Industrias, en Chihuahua. Agenda por WhatsApp y llega directo a tu corte.</p>
+        </header>
 
-        </div>
-        <div class="tarjeta-mini">
-            <h3> WhatsApp</h3>
-            <a href="tel:+526143633515">+52 614 363 3515</a>
-        </div>
-        <div class="tarjeta-mini">
-            <h3> Horarios</h3>
-            <p>Lun - Sab: 10:00 AM - 8:00 PM</p>
-        </div>
+        <section class="contacto-datos" aria-labelledby="contacto-datos-titulo">
+            <h2 id="contacto-datos-titulo" class="sr-only">Datos de contacto</h2>
+            <address>
+                <dl class="datos-lista">
+                    <div class="dato">
+                        <dt><?= svgIcono('ubicacion') ?>Dirección</dt>
+                        <dd>
+                            <p class="dato-valor">Av. Industrias, Chihuahua, Chih., 31136</p>
+                            <a class="btn btn-contorno dato-accion" href="https://maps.app.goo.gl/LEtbziQ2he6aUzBK7" target="_blank" rel="noopener noreferrer">
+                                Cómo llegar<?= svgIcono('externo', 'icono-sm') ?><span class="sr-only"> (se abre en Google Maps)</span>
+                            </a>
+                        </dd>
+                    </div>
+                    <div class="dato">
+                        <dt><?= svgIcono('mensaje') ?>WhatsApp</dt>
+                        <dd>
+                            <a class="dato-valor dato-telefono t-num" href="tel:+526143633515">+52 614 363 3515</a>
+                            <a class="btn btn-contorno dato-accion" href="https://wa.me/526143633515" target="_blank" rel="noopener noreferrer">
+                                Escribir por WhatsApp<?= svgIcono('externo', 'icono-sm') ?><span class="sr-only"> (se abre en otra pestaña)</span>
+                            </a>
+                        </dd>
+                    </div>
+                    <div class="dato">
+                        <dt><?= svgIcono('reloj') ?>Horario</dt>
+                        <dd>
+                            <p class="dato-valor t-num">Lun – Sáb · 10:00 – 20:00</p>
+                            <p class="dato-nota">Domingo cerrado</p>
+                            <span class="insignia dato-estado" id="contacto-estado" hidden></span>
+                        </dd>
+                    </div>
+                </dl>
+            </address>
+        </section>
     </div>
 
-
-    <div class="tarjeta-dividida">
-
-        <div class="contacto-formulario">
-            <h2>Agenda tu corte</h2>
-            <form id="formulario-contacto" method="post">
+    <section class="contacto-agenda tarjeta" aria-labelledby="contacto-agenda-titulo">
+        <h2 id="contacto-agenda-titulo">Agenda tu corte</h2>
+        <p class="agenda-intro">Déjanos tus datos y te abrimos WhatsApp con el mensaje listo. Solo revísalo y envíalo para confirmar disponibilidad.</p>
+        <form id="formulario-contacto" class="agenda-form" method="post" novalidate>
+            <div class="campo">
                 <label for="contacto-nombre">Tu nombre</label>
                 <input id="contacto-nombre" type="text" name="nombre" autocomplete="name" minlength="2" maxlength="100"
-                    pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" aria-describedby="contacto-ayuda-nombre contacto-error-nombre"
-                    required>
-                <p class="contacto-ayuda" id="contacto-ayuda-nombre"></p>
-                <p class="contacto-error" id="contacto-error-nombre" aria-live="polite"></p>
+                    pattern="[A-Za-zÁÉÍÓÚÜÑáéíóúüñ ]+" aria-describedby="contacto-error-nombre" required>
+                <p class="campo-error" id="contacto-error-nombre" aria-live="polite"></p>
+            </div>
+            <div class="campo">
                 <label for="contacto-telefono">Tu celular</label>
                 <input id="contacto-telefono" type="tel" name="telefono" autocomplete="tel-national" inputmode="numeric"
-                    pattern="[0-9]{10}" aria-describedby="contacto-ayuda-telefono contacto-error-telefono" required>
-                <p class="contacto-ayuda" id="contacto-ayuda-telefono">Exactamente 10 números</p>
-                <p class="contacto-error" id="contacto-error-telefono" aria-live="polite"></p>
+                    pattern="[0-9]{10}" placeholder="6140000000"
+                    aria-describedby="contacto-ayuda-telefono contacto-error-telefono" required>
+                <p class="campo-ayuda" id="contacto-ayuda-telefono">10 dígitos, sin lada internacional.</p>
+                <p class="campo-error" id="contacto-error-telefono" aria-live="polite"></p>
+            </div>
+            <div class="campo campo-ancho">
                 <label for="contacto-servicio">Servicio</label>
                 <select id="contacto-servicio" name="servicio" aria-describedby="contacto-error-servicio" required>
-                    <option value="" disabled selected>Elige tu servicio...</option>
+                    <option value="" disabled selected>Elige tu servicio</option>
                     <option value="fade">Corte Fade Navaja</option>
-                    <option value="clasico">Clasico Tradicional</option>
+                    <option value="clasico">Clásico Tradicional</option>
                     <option value="barba">Diseño de Barba</option>
                 </select>
-                <p class="contacto-error" id="contacto-error-servicio" aria-live="polite"></p>
-                <button type="submit">Continuar en WhatsApp</button>
-                <p class="contacto-ayuda">Se abrirá WhatsApp con tu solicitud. Revisa y envía el mensaje para consultar
-                    disponibilidad.</p>
-            </form>
-        </div>
+                <p class="campo-error" id="contacto-error-servicio" aria-live="polite"></p>
+            </div>
+            <div class="agenda-envio campo-ancho">
+                <button type="submit" class="btn btn-primario btn-lg agenda-boton">
+                    <?= svgIcono('mensaje') ?>Continuar en WhatsApp
+                </button>
+            </div>
+        </form>
+    </section>
 
-
-        <div class="contacto-mapa">
-
-            <iframe title="Ubicacion de Fresh Cuttz Barbershop"
-                src="https://maps.google.com/maps?q=28.726003,-106.111288&amp;z=16&amp;output=embed" width="100%"
-                height="100%" style="border:0;" allowfullscreen="" loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-
-    </div>
+    <figure class="contacto-mapa">
+        <iframe title="Mapa: ubicación de Fresh Cuttz Barbershop en Av. Industrias, Chihuahua"
+            src="https://maps.google.com/maps?q=28.726003,-106.111288&amp;z=16&amp;output=embed"
+            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </figure>
 </main>
 <script src="./scripts/contacto.js?v=<?= filemtime(__DIR__ . '/scripts/contacto.js') ?>" defer></script>
 <?php require __DIR__ . '/includes/footer.php'; ?>

@@ -3,7 +3,6 @@
     const panel = document.getElementById('panel-carrito');
     if (!boton || !panel) return;
 
-    const contenido = panel.querySelector('.carrito-contenido');
     const lista = document.getElementById('carrito-productos');
     const total = document.getElementById('carrito-total');
     const contador = document.getElementById('carrito-contador');
@@ -13,25 +12,28 @@
     const formularioPago = document.getElementById('formulario-pago');
     const totalPago = document.getElementById('pago-total');
     const resumenPago = document.getElementById('pago-resumen');
+    const volverCarrito = document.getElementById('volver-carrito');
     const formatoPrecio = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
     const claveAlmacenamiento = 'freshcuttz-carrito-v1';
     let articulos = [];
-    const movimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let animacion;
-    let cerrando = false;
     let contextoPago = null;
 
-    const deslizar = (desde, hasta) => contenido.animate(
-        [{ transform: desde }, { transform: hasta }],
-        { duration: movimientoReducido.matches ? 0 : 280, easing: 'ease-out', fill: 'forwards' }
-    );
+    // Utilidades de ui.js con respaldo por si no cargara.
+    const cerrarDialogo = (dialogo) => window.ui?.cerrarDialogo
+        ? window.ui.cerrarDialogo(dialogo)
+        : (dialogo.open && dialogo.close(), Promise.resolve());
+    const avisar = (mensaje, tipo) => window.ui?.toast(mensaje, tipo);
+    const icono = (nombre, clases) => window.ui?.icono(nombre, clases) ?? document.createTextNode('');
+    const cargando = (control, activo) => {
+        if (window.ui?.cargando) window.ui.cargando(control, activo);
+        else control.disabled = activo;
+    };
 
     const abrir = () => {
         if (panel.open) return;
         panel.showModal();
         boton.setAttribute('aria-expanded', 'true');
         document.documentElement.classList.add('carrito-abierto');
-        animacion = deslizar('translateX(100%)', 'translateX(0)');
     };
     boton.addEventListener('click', abrir);
 
@@ -63,7 +65,40 @@
             });
         }
     } catch {
+        // Sin almacenamiento el carrito funciona solo durante esta visita.
     }
+
+    const botonIcono = (nombreIcono, etiqueta, id, clases = '') => {
+        const control = document.createElement('button');
+        control.type = 'button';
+        control.className = `btn btn-fantasma btn-icono btn-sm ${clases}`.trim();
+        control.id = id;
+        control.setAttribute('aria-label', etiqueta);
+        control.append(icono(nombreIcono, 'icono-sm'));
+        return control;
+    };
+
+    const estadoVacio = () => {
+        const vacio = document.createElement('div');
+        vacio.className = 'vacio carrito-vacio';
+        const titulo = document.createElement('strong');
+        titulo.textContent = 'Tu carrito está vacío';
+        const texto = document.createElement('p');
+        texto.textContent = 'Agrega productos para el cuidado de tu cabello y barba, y págalos al recogerlos en la barbería.';
+        const enlace = document.createElement('a');
+        enlace.className = 'btn btn-contorno';
+        enlace.href = 'productos.php';
+        enlace.append('Ver productos', icono('flecha-derecha', 'icono-sm'));
+        // Si ya estamos en productos, basta con cerrar el panel.
+        enlace.addEventListener('click', (evento) => {
+            if (/\/productos\.php$/.test(location.pathname)) {
+                evento.preventDefault();
+                cerrar();
+            }
+        });
+        vacio.append(icono('carrito'), titulo, texto, enlace);
+        return vacio;
+    };
 
     const actualizar = () => {
         lista.replaceChildren();
@@ -73,45 +108,63 @@
             unidades += articulo.cantidad;
             const subtotalCentavos = Math.round(articulo.precio * 100) * articulo.cantidad;
             totalCentavos += subtotalCentavos;
+
             const fila = document.createElement('article');
             fila.className = 'carrito-articulo';
-            const foto = document.createElement('img');
-            foto.className = 'carrito-foto';
-            foto.alt = articulo.nombre;
-            if (articulo.foto) foto.src = articulo.foto;
-            else foto.hidden = true;
+
+            let foto;
+            if (articulo.foto) {
+                foto = document.createElement('img');
+                foto.className = 'carrito-foto';
+                foto.alt = articulo.nombre;
+                foto.width = 72;
+                foto.height = 72;
+                foto.src = articulo.foto;
+            } else {
+                foto = document.createElement('span');
+                foto.className = 'carrito-foto-vacia';
+                foto.append(icono('productos'));
+            }
+
             const detalle = document.createElement('div');
             detalle.className = 'carrito-detalle';
             const nombre = document.createElement('h3');
             nombre.textContent = articulo.nombre;
-            const cantidad = document.createElement('p');
-            cantidad.textContent = `${articulo.cantidad} × ${formatoPrecio.format(articulo.precio)}`;
-            const subtotal = document.createElement('strong');
-            subtotal.textContent = formatoPrecio.format(subtotalCentavos / 100);
+            const precio = document.createElement('p');
+            precio.className = 'carrito-precio';
+            precio.textContent = `${formatoPrecio.format(articulo.precio)} c/u`;
+
+            const quitar = botonIcono('borrar', `Quitar ${articulo.nombre} del carrito`,
+                `carrito-quitar-${articulo.id}`, 'carrito-quitar');
+
             const controles = document.createElement('div');
             controles.className = 'carrito-cantidad';
+            const disminuir = botonIcono('menos', `Disminuir cantidad de ${articulo.nombre}`,
+                `carrito-disminuir-${articulo.id}`);
+            disminuir.disabled = articulo.cantidad <= 1;
             const unidadesProducto = document.createElement('span');
             unidadesProducto.textContent = articulo.cantidad;
             unidadesProducto.setAttribute('aria-label', `Cantidad: ${articulo.cantidad}`);
-            const disminuir = document.createElement('button');
-            disminuir.type = 'button';
-            disminuir.textContent = '−';
-            disminuir.disabled = articulo.cantidad <= 1;
-            disminuir.setAttribute('aria-label', `Disminuir cantidad de ${articulo.nombre}`);
-            disminuir.id = `carrito-disminuir-${articulo.id}`;
-            const aumentar = document.createElement('button');
-            aumentar.type = 'button';
-            aumentar.textContent = '+';
+            const aumentar = botonIcono('mas', `Aumentar cantidad de ${articulo.nombre}`,
+                `carrito-aumentar-${articulo.id}`);
             aumentar.disabled = articulo.cantidadDisponible !== null && articulo.cantidad >= articulo.cantidadDisponible;
-            aumentar.setAttribute('aria-label', `Aumentar cantidad de ${articulo.nombre}`);
-            aumentar.id = `carrito-aumentar-${articulo.id}`;
+            controles.append(disminuir, unidadesProducto, aumentar);
+
+            const subtotal = document.createElement('strong');
+            subtotal.className = 'carrito-subtotal';
+            subtotal.textContent = formatoPrecio.format(subtotalCentavos / 100);
+
+            const inferior = document.createElement('div');
+            inferior.className = 'carrito-fila-inferior';
+            inferior.append(controles, subtotal);
+
             const restaurarFoco = (id) => {
                 const control = document.getElementById(id);
                 if (control && !control.disabled) control.focus();
                 else document.getElementById(`carrito-quitar-${articulo.id}`)?.focus();
             };
             aumentar.addEventListener('click', () => {
-                window.carritoCompras.agregar(articulo);
+                window.carritoCompras.agregar(articulo, { silencioso: true });
                 restaurarFoco(aumentar.id);
             });
             disminuir.addEventListener('click', () => {
@@ -121,29 +174,19 @@
                 estado.textContent = `Cantidad de ${articulo.nombre}: ${articulo.cantidad}. Total: ${total.textContent}.`;
                 restaurarFoco(disminuir.id);
             });
-            controles.append(disminuir, unidadesProducto, aumentar);
-            const quitar = document.createElement('button');
-            quitar.id = `carrito-quitar-${articulo.id}`;
-            quitar.type = 'button';
-            quitar.className = 'carrito-quitar';
-            quitar.textContent = 'Quitar';
-            quitar.setAttribute('aria-label', `Quitar ${articulo.nombre} del carrito`);
             quitar.addEventListener('click', () => {
                 articulos = articulos.filter(producto => producto.id !== articulo.id);
                 actualizar();
                 estado.textContent = `${articulo.nombre} se quitó del carrito.`;
-                (lista.querySelector('button') || panel.querySelector('[data-cerrar-carrito]')).focus();
+                (lista.querySelector('button, a') || panel.querySelector('[data-cerrar-carrito]')).focus();
             });
-            detalle.append(nombre, cantidad, controles, subtotal, quitar);
+
+            detalle.append(nombre, quitar, precio, inferior);
             fila.append(foto, detalle);
             lista.append(fila);
         });
-        if (!articulos.length) {
-            const vacio = document.createElement('p');
-            vacio.className = 'carrito-vacio';
-            vacio.textContent = 'Tu carrito está vacío.';
-            lista.append(vacio);
-        }
+        if (!articulos.length) lista.append(estadoVacio());
+
         total.textContent = formatoPrecio.format(totalCentavos / 100);
         contador.textContent = unidades;
         contador.hidden = unidades === 0;
@@ -152,9 +195,16 @@
         try {
             localStorage.setItem(claveAlmacenamiento, JSON.stringify(articulos));
         } catch {
-        
+            // Sin almacenamiento el carrito funciona solo durante esta visita.
         }
         document.dispatchEvent(new CustomEvent('carrito:actualizado'));
+    };
+
+    const abrirModalPago = () => {
+        formularioPago.reset();
+        formularioPago.querySelectorAll('details').forEach(detalle => { detalle.open = false; });
+        modalPago.showModal();
+        formularioPago.querySelector('input')?.focus();
     };
 
     window.carritoCompras = {
@@ -168,7 +218,7 @@
             });
             actualizar();
         },
-        agregar: (datos) => {
+        agregar: (datos, opciones = {}) => {
             const producto = normalizarProducto(datos);
             if (!producto) return;
             const existente = articulos.find(articulo => articulo.id === producto.id);
@@ -176,13 +226,21 @@
             if (producto.cantidadDisponible !== null && cantidad > producto.cantidadDisponible) {
                 estado.textContent = `Ya agregaste todas las unidades disponibles de ${producto.nombre}.`;
                 abrir();
+                avisar(`No hay más unidades de ${producto.nombre}.`, 'advertencia');
                 return;
             }
             if (existente) Object.assign(existente, producto, { cantidad });
             else articulos.push({ ...producto, cantidad });
             actualizar();
             estado.textContent = `${producto.nombre} agregado. Total: ${total.textContent}.`;
+            const yaAbierto = panel.open;
             abrir();
+            if (opciones.silencioso) return;
+            // El toast se crea con el panel abierto (capa superior) y al terminar su entrada,
+            // para que la animación del panel no lo desplace.
+            const mostrarAviso = () => avisar(`Agregado: ${producto.nombre}`, 'exito');
+            if (yaAbierto) mostrarAviso();
+            else setTimeout(mostrarAviso, 320);
         },
         abrirPago: (datos) => {
             if (!datos || !Number.isFinite(datos.total) || datos.total < 0) return;
@@ -191,16 +249,17 @@
             resumenPago.replaceChildren();
             Object.entries(datos.resumen || {}).forEach(([etiqueta, valor]) => {
                 const linea = document.createElement('p');
-                const titulo = document.createElement('strong');
-                titulo.textContent = `${etiqueta}: `;
-                linea.append(titulo, document.createTextNode(String(valor)));
+                const titulo = document.createElement('span');
+                titulo.textContent = etiqueta;
+                const dato = document.createElement('strong');
+                dato.textContent = String(valor);
+                linea.append(titulo, dato);
                 resumenPago.append(linea);
             });
             resumenPago.hidden = false;
-            formularioPago.reset();
-            formularioPago.querySelectorAll('details').forEach(detalle => { detalle.open = false; });
-            modalPago.showModal();
-            formularioPago.querySelector('input')?.focus();
+            // Un pago de cita no viene del carrito: no tiene sentido "volver al carrito".
+            volverCarrito.hidden = true;
+            abrirModalPago();
         }
     };
     actualizar();
@@ -209,10 +268,9 @@
         if (!articulos.length) return;
         contextoPago = null;
         resumenPago.hidden = true;
+        volverCarrito.hidden = false;
         totalPago.textContent = total.textContent;
-        formularioPago.reset();
-        modalPago.showModal();
-        formularioPago.querySelector('input')?.focus();
+        abrirModalPago();
     });
     formularioPago.querySelectorAll('input[name="metodo-pago"]').forEach((opcion) => {
         opcion.addEventListener('change', () => {
@@ -221,8 +279,19 @@
             });
         });
     });
-    document.getElementById('cerrar-pago').addEventListener('click', () => modalPago.close());
-    document.getElementById('volver-carrito').addEventListener('click', () => modalPago.close());
+    document.getElementById('cerrar-pago').addEventListener('click', () => cerrarDialogo(modalPago));
+    volverCarrito.addEventListener('click', () => cerrarDialogo(modalPago));
+    modalPago.addEventListener('cancel', (evento) => {
+        evento.preventDefault();
+        cerrarDialogo(modalPago);
+    });
+    modalPago.addEventListener('click', (evento) => {
+        if (evento.target !== modalPago) return;
+        const borde = modalPago.getBoundingClientRect();
+        if (evento.clientX < borde.left || evento.clientX > borde.right ||
+            evento.clientY < borde.top || evento.clientY > borde.bottom) cerrarDialogo(modalPago);
+    });
+
     const estadoPago = document.getElementById('pago-estado');
     const confirmacionPago = document.getElementById('pago-confirmacion');
     const textoConfirmacion = document.getElementById('pago-confirmacion-texto');
@@ -238,8 +307,8 @@
         confirmacionPago.hidden = true;
         estadoPago.textContent = '';
     });
-    document.getElementById('pago-listo').addEventListener('click', () => {
-        modalPago.close();
+    document.getElementById('pago-listo').addEventListener('click', async () => {
+        await cerrarDialogo(modalPago);
         window.location.href = 'index.php';
     });
 
@@ -257,8 +326,7 @@
             : { tipo: 'productos', metodo: opcion.value, articulos: articulos.map(({ id, cantidad }) => ({ id, cantidad })) };
 
         estadoPago.textContent = '';
-        botonConfirmar.disabled = true;
-        botonConfirmar.textContent = 'Registrando…';
+        cargando(botonConfirmar, true);
         try {
             const respuesta = await fetch('api/pedido.php', {
                 method: 'POST',
@@ -268,16 +336,18 @@
             });
             const datos = await respuesta.json().catch(() => ({}));
             if (!respuesta.ok) {
-                estadoPago.textContent = datos.error || 'No se pudo registrar tu pedido. Intenta de nuevo.';
+                const mensaje = datos.error || 'No se pudo registrar tu pedido. Intenta de nuevo.';
                 if (datos.requiereLogin) {
                     // El carrito se conserva; al iniciar sesión la página se recarga y puede pagar.
-                    modalPago.close();
-                    // Cerramos el carrito para que el login no quede detrás de otro diálogo modal.
-                    animacion?.cancel();
-                    panel.close();
-                    estado.textContent = datos.error;
+                    // Cerramos el pago y el carrito para que el login no quede detrás de otro diálogo modal.
+                    await cerrarDialogo(modalPago);
+                    await cerrarDialogo(panel);
+                    estado.textContent = mensaje;
                     document.getElementById('abrir-perfil')?.click();
-                    document.getElementById('login-estado').textContent = datos.error;
+                    const estadoLogin = document.getElementById('login-estado');
+                    if (estadoLogin) estadoLogin.textContent = mensaje;
+                } else {
+                    estadoPago.textContent = mensaje;
                 }
                 return;
             }
@@ -294,25 +364,20 @@
             confirmacionPago.hidden = false;
             document.getElementById('pago-listo').focus();
         } catch {
-            estadoPago.textContent = 'No hay conexión con el servidor. Revisa que XAMPP esté encendido.';
+            const mensaje = 'No hay conexión con el servidor. Revisa que XAMPP esté encendido.';
+            estadoPago.textContent = mensaje;
+            avisar('Sin conexión con el servidor.', 'error');
         } finally {
-            botonConfirmar.disabled = false;
-            botonConfirmar.textContent = 'Confirmar pago';
+            cargando(botonConfirmar, false);
         }
     });
 
+    let cerrando = false;
     const cerrar = async () => {
         if (!panel.open || cerrando) return;
         cerrando = true;
-        const posicion = getComputedStyle(contenido).transform;
-        animacion?.cancel();
-        animacion = deslizar(posicion, 'translateX(100%)');
-        try {
-            await animacion.finished;
-        } catch {
-        
-        }
-        panel.close();
+        await cerrarDialogo(panel);
+        cerrando = false;
     };
 
     panel.querySelectorAll('[data-cerrar-carrito]').forEach((control) => {
@@ -326,7 +391,6 @@
         cerrar();
     });
     panel.addEventListener('close', () => {
-        animacion?.cancel();
         cerrando = false;
         boton.setAttribute('aria-expanded', 'false');
         document.documentElement.classList.remove('carrito-abierto');

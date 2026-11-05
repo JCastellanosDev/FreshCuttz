@@ -80,15 +80,55 @@ CREATE TABLE IF NOT EXISTS citas (
     fecha DATE NOT NULL,
     hora TIME NOT NULL,
     cancelada TINYINT(1) NOT NULL DEFAULT 0,
-    activa TINYINT(1) AS (IF(cancelada = 1, NULL, 1)) PERSISTENT,
+    activa TINYINT(1) AS (IF(cancelada = 1, NULL, 1)) STORED,
     UNIQUE KEY uq_citas_pedido (pedido_id),
     UNIQUE KEY uq_citas_horario (barbero_id, fecha, hora, activa),
     KEY idx_citas_fecha (fecha),
     CONSTRAINT fk_citas_pedido FOREIGN KEY (pedido_id) REFERENCES pedidos (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Tarjeta de sellos (Fresh Club): una visita por cliente por día.
+-- origen: 'nfc' cuando el cliente acerca su celular a la etiqueta, 'manual' cuando la registra el panel.
+CREATE TABLE IF NOT EXISTS visitas (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNSIGNED NOT NULL,
+    dia DATE NOT NULL,
+    origen ENUM('nfc', 'manual') NOT NULL DEFAULT 'nfc',
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_visitas_dia (usuario_id, dia),
+    KEY idx_visitas_creado (creado_en),
+    CONSTRAINT fk_visitas_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Cortes gratis ya entregados. Disponibles = floor(visitas / meta) - canjes.
+CREATE TABLE IF NOT EXISTS canjes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT UNSIGNED NOT NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_canjes_usuario (usuario_id),
+    CONSTRAINT fk_canjes_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Sesiones de PHP (clientes y panel). En Vercel no hay disco compartido entre instancias.
+CREATE TABLE IF NOT EXISTS sesiones (
+    id VARCHAR(128) NOT NULL PRIMARY KEY,
+    datos MEDIUMBLOB NOT NULL,
+    expira INT UNSIGNED NOT NULL,
+    KEY idx_sesiones_expira (expira)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Fotos de productos subidas desde el panel. La ruta es la misma que usa productos.foto
+-- (./image/productos/producto-xxxx.webp); imagen.php la sirve cuando no existe como archivo.
+CREATE TABLE IF NOT EXISTS imagenes (
+    ruta VARCHAR(255) NOT NULL PRIMARY KEY,
+    tipo VARCHAR(30) NOT NULL,
+    datos MEDIUMBLOB NOT NULL,
+    creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Datos iniciales (no duplica si ya existen).
 INSERT IGNORE INTO configuracion (clave, valor) VALUES ('precio_corte', '250');
+INSERT IGNORE INTO configuracion (clave, valor) VALUES ('sellos_meta', '8');
 
 INSERT IGNORE INTO productos (id, nombre, precio, stock, foto) VALUES
     (1, 'Cera', 250, NULL, './image/productos/cera-sin-fondo.png'),

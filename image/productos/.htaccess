@@ -1,0 +1,5 @@
+# XAMPP: las fotos subidas desde el panel viven en MySQL (tabla imagenes).
+# Si el archivo no existe en disco, lo sirve imagen.php. En Vercel lo hace el Caddyfile.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^producto-[a-f0-9]{12}\.(png|webp|jpg)$ ../../imagen.php [L]

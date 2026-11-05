@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Fresh Cuttz · Portada (index.php)
+   Usa los tokens y componentes de sistema.css.
+   ========================================================================== */
+
+.inicio { display: block; padding-bottom: var(--esp-24); }
+
+/* ---------- Portada ---------- */
+.portada {
+    position: relative;
+    display: grid;
+    isolation: isolate;
+    overflow: hidden;
+}
+.portada-foto { position: relative; z-index: -1; }
+.portada-foto img {
+    width: 100%;
+    aspect-ratio: 1;
+    max-height: 640px;
+    object-fit: cover;
+    object-position: center 68%;
+    -webkit-mask-image: linear-gradient(to bottom, #000 50%, transparent 98%);
+    mask-image: linear-gradient(to bottom, #000 50%, transparent 98%);
+}
+.portada-texto {
+    display: grid;
+    justify-items: start;
+    gap: var(--esp-5);
+    width: min(100% - 2 * var(--margen-pagina), var(--ancho-max));
+    margin: calc(-1 * var(--esp-12)) auto 0;
+    padding-bottom: var(--esp-12);
+}
+.portada h1 {
+    font-size: clamp(3.25rem, 1.5rem + 8vw, 6rem);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    max-width: 9ch;
+    text-shadow: 0 2px 24px hsl(24 10% 4% / 0.6);
+}
+.portada-acento { color: var(--primario); }
+.portada-apoyo {
+    max-width: 40ch;
+    font-size: var(--texto-lg);
+    color: var(--texto-2);
+}
+.portada-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--esp-3);
+    margin-top: var(--esp-2);
+}
+.portada-acciones .btn { flex: 1 1 200px; }
+
+/* Saludo de sesión (lo rellena scripts/perfil.js) */
+.saludo-cliente {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--esp-2);
+    padding: var(--esp-2) var(--esp-4);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio-pill);
+    background: hsl(24 6% 10% / 0.8);
+    color: var(--texto);
+    font-size: var(--texto-base);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    animation: subir var(--dur-lenta) var(--curva-salida) both;
+}
+.saludo-cliente::before {
+    content: "";
+    width: var(--esp-2);
+    height: var(--esp-2);
+    border-radius: 50%;
+    background: var(--exito);
+    flex-shrink: 0;
+}
+
+@media (min-width: 960px) {
+    .portada {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        min-height: min(88svh, 760px);
+    }
+    .portada-foto {
+        grid-column: 2;
+        grid-row: 1;
+        align-self: stretch;
+    }
+    .portada-foto img {
+        height: 100%;
+        object-position: center 62%;
+        -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 35%);
+        mask-image: linear-gradient(to right, transparent 0%, #000 35%);
+    }
+    .portada-texto {
+        grid-column: 1 / -1;
+        grid-row: 1;
+        width: min(100% - 2 * var(--margen-pagina), var(--ancho-max));
+        margin: 0 auto;
+        padding-block: var(--esp-16);
+    }
+    .portada-texto > * { max-width: 560px; }
+    .portada-acciones .btn { flex: 0 0 auto; }
+}
+
+/* ---------- Franja de datos ---------- */
+.datos-local {
+    border-block: 1px solid var(--borde);
+    background: var(--fondo-fuerte);
+}
+.datos-lista {
+    display: grid;
+    width: min(100% - 2 * var(--margen-pagina), var(--ancho-max));
+    margin-inline: auto;
+}
+.dato {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--esp-3);
+    align-items: center;
+    padding-block: var(--esp-5);
+}
+.dato + .dato { border-top: 1px solid var(--borde); }
+.dato .icono { grid-row: span 2; color: var(--primario); width: 24px; height: 24px; }
+.dato dt {
+    font-size: var(--texto-xs);
+    font-weight: 600;
+    color: var(--texto-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.dato dd {
+    margin: 0;
+    font-size: var(--texto-lg);
+    font-weight: 650;
+    color: var(--texto);
+}
+.dato dd a { text-decoration: none; transition: color var(--dur-rapida) var(--curva-estandar); }
+.dato dd a:hover { color: var(--primario-hover); text-decoration: underline; }
+
+@media (min-width: 720px) {
+    .datos-lista { grid-template-columns: repeat(3, 1fr); }
+    .dato { padding: var(--esp-6) var(--esp-6); }
+    .dato:first-child { padding-left: 0; }
+    .dato + .dato { border-top: 0; border-left: 1px solid var(--borde); }
+}
+
+/* ---------- Equipo ---------- */
+.equipo {
+    width: min(100% - 2 * var(--margen-pagina), var(--ancho-max));
+    margin: var(--esp-20) auto 0;
+    scroll-margin-top: var(--esp-6);
+}
+.equipo-cabecera {
+    display: grid;
+    gap: var(--esp-3);
+    margin-bottom: var(--esp-10);
+}
+.equipo-intro { max-width: 46ch; font-size: var(--texto-lg); color: var(--texto-2); }
+
+@media (min-width: 840px) {
+    .equipo-cabecera {
+        grid-template-columns: auto 1fr;
+        align-items: end;
+        gap: var(--esp-10);
+    }
+    .equipo-intro { justify-self: end; text-align: right; }
+}
+
+.equipo-rejilla {
+    display: grid;
+    gap: var(--esp-10) var(--esp-6);
+}
+@media (min-width: 600px) {
+    .equipo-rejilla { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+    .equipo-rejilla { grid-template-columns: repeat(6, 1fr); }
+    .barbero { grid-column: span 2; }
+    .barbero:nth-child(-n + 2) { grid-column: span 3; }
+    .barbero:nth-child(-n + 2) .barbero-foto { aspect-ratio: 6 / 5; }
+}
+
+.barbero { min-width: 0; }
+.barbero-enlace {
+    display: grid;
+    gap: var(--esp-4);
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radio-lg);
+    -webkit-tap-highlight-color: transparent;
+}
+.barbero-enlace:focus-visible { outline-offset: 6px; border-radius: var(--radio-lg); }
+.barbero-foto {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radio-lg);
+    background: var(--superficie-2);
+    box-shadow: var(--sombra-2);
+    transition: scale var(--dur-rapida) var(--curva-estandar);
+}
+.barbero-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: scale var(--dur-lenta) var(--curva-salida), filter var(--dur-lenta) var(--curva-salida);
+}
+.barbero-foto::after {
+    content: "";
+    position: absolute;
+    inset: 45% 0 0;
+    background: linear-gradient(to top, hsl(24 10% 4% / 0.92), transparent);
+    pointer-events: none;
+}
+.barbero-nombre {
+    position: absolute;
+    z-index: 1;
+    inset: auto var(--esp-5) var(--esp-5);
+    display: grid;
+    gap: var(--esp-1);
+    font-size: clamp(2.25rem, 1.75rem + 2vw, 3rem);
+    font-weight: 850;
+    font-stretch: var(--ancho-display);
+    text-transform: uppercase;
+    line-height: 0.9;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+}
+.barbero-apodo {
+    font-size: var(--texto-lg);
+    font-weight: 650;
+    font-stretch: 100%;
+    text-transform: none;
+    letter-spacing: 0;
+    line-height: 1.2;
+    color: var(--primario-hover);
+}
+.barbero-apodo::before { content: "\201C"; }
+.barbero-apodo::after { content: "\201D"; }
+.barbero-pie {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--esp-4);
+    padding-inline: var(--esp-1);
+}
+.barbero-descripcion { color: var(--texto-2); max-width: 36ch; }
+.barbero-ver {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--borde-fuerte);
+    border-radius: 50%;
+    color: var(--texto);
+    transition:
+        background-color var(--dur) var(--curva-estandar),
+        border-color var(--dur) var(--curva-estandar),
+        color var(--dur) var(--curva-estandar);
+}
+.barbero-ver .icono { transition: translate var(--dur) var(--curva-salida); }
+
+@media (hover: hover) and (pointer: fine) {
+    .barbero-enlace:hover .barbero-foto img { scale: 1.04; }
+    .barbero-enlace:hover .barbero-ver {
+        background: var(--primario);
+        border-color: var(--primario);
+        color: var(--sobre-primario);
+    }
+    .barbero-enlace:hover .barbero-ver .icono { translate: 2px 0; }
+}
+.barbero-enlace:active .barbero-foto { scale: 0.98; }

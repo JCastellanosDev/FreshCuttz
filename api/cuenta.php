@@ -1,6 +1,7 @@
 <?php
 // API de cuentas: crear cuenta, iniciar sesión, cerrar sesión y consultar la sesión actual.
-session_start();
+require_once __DIR__ . '/../includes/sesion.php';
+abrirSesion();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../includes/conexion.php';

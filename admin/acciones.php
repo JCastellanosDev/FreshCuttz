@@ -1,6 +1,7 @@
 <?php
 // Todas las acciones del panel llegan aquí por POST y regresan a la sección de origen.
 require_once __DIR__ . '/../includes/admin.php';
+require_once __DIR__ . '/../includes/lealtad.php';
 
 $admin = exigirAdmin();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -10,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 verificarCsrf();
 
 $accion = (string)($_POST['accion'] ?? '');
-$secciones = ['resumen', 'pedidos', 'citas', 'productos', 'cuentas', 'ajustes'];
+$secciones = ['resumen', 'pedidos', 'citas', 'productos', 'cuentas', 'club', 'ajustes'];
 $volver = in_array($_POST['volver'] ?? '', $secciones, true) ? $_POST['volver'] : 'resumen';
 
 function regresar(string $seccion): void
@@ -45,11 +46,14 @@ function datosProducto(): array
     return [['nombre' => $nombre, 'precio' => round($precio, 2), 'stock' => $stock, 'activo' => isset($_POST['activo']) ? 1 : 0], null];
 }
 
-/** Guarda la foto subida en image/productos y devuelve su ruta, o lanza un mensaje de error. */
+/**
+ * Guarda la foto subida en MySQL (tabla imagenes) y devuelve su ruta pública, o lanza un mensaje de error.
+ * No se escribe en disco: en Vercel el disco del contenedor es temporal y no se comparte entre instancias.
+ */
 function guardarFoto(array $archivo): string
 {
     if (($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
-        throw new RuntimeException('No se pudo subir la foto. Intenta con otra imagen.');
+        throw new RuntimeException('No se pudo subir la foto. Intenta con otra imagen de máximo 3 MB.');
     }
     if ($archivo['size'] > 3 * 1024 * 1024) {
         throw new RuntimeException('La foto pesa más de 3 MB.');
@@ -59,12 +63,10 @@ function guardarFoto(array $archivo): string
     if (!isset($tipos[$tipo])) {
         throw new RuntimeException('La foto debe ser PNG, JPG o WEBP.');
     }
-    $nombre = 'producto-' . bin2hex(random_bytes(6)) . '.' . $tipos[$tipo];
-    $destino = __DIR__ . '/../image/productos/' . $nombre;
-    if (!move_uploaded_file($archivo['tmp_name'], $destino)) {
-        throw new RuntimeException('El servidor no pudo guardar la foto (revisa permisos de image/productos).');
-    }
-    return './image/productos/' . $nombre;
+    $ruta = './image/productos/producto-' . bin2hex(random_bytes(6)) . '.' . $tipos[$tipo];
+    conexion()->prepare('INSERT INTO imagenes (ruta, tipo, datos) VALUES (?, ?, ?)')
+        ->execute([$ruta, $tipo, file_get_contents($archivo['tmp_name'])]);
+    return $ruta;
 }
 
 $db = conexion();
@@ -218,6 +220,47 @@ try {
                 $db->prepare('DELETE FROM administradores WHERE id = ?')->execute([$id]);
                 avisar('Administrador eliminado.');
             }
+            break;
+
+        case 'club_sello':
+            $id = entero($_POST['id'] ?? null);
+            $cliente = $db->prepare('SELECT nombre FROM usuarios WHERE id = ?');
+            $cliente->execute([$id]);
+            $nombre = $cliente->fetchColumn();
+            if (!$id || $nombre === false) {
+                avisar('Ese cliente ya no existe.', 'error');
+            } elseif (registrarVisita($id, 'manual')) {
+                $tarjeta = tarjetaCliente($id);
+                avisar("Sello agregado a {$nombre}: {$tarjeta['sellos']}/{$tarjeta['meta']}"
+                    . ($tarjeta['sellos'] === 0 ? ' — ¡completó su tarjeta y ganó un corte gratis!' : '.'));
+            } else {
+                avisar("{$nombre} ya tiene registrada su visita de hoy.", 'error');
+            }
+            break;
+
+        case 'club_canjear':
+            $id = entero($_POST['id'] ?? null);
+            if (!$id || tarjetaCliente($id)['recompensas'] < 1) {
+                avisar('Ese cliente no tiene cortes gratis por canjear.', 'error');
+                break;
+            }
+            $db->prepare('INSERT INTO canjes (usuario_id) VALUES (?)')->execute([$id]);
+            avisar('Corte gratis canjeado.');
+            break;
+
+        case 'club_meta':
+            $meta = entero($_POST['meta'] ?? null, SELLOS_META_MIN);
+            if (!$meta || $meta > SELLOS_META_MAX) {
+                avisar('La meta debe estar entre ' . SELLOS_META_MIN . ' y ' . SELLOS_META_MAX . ' sellos.', 'error');
+                break;
+            }
+            guardarConfiguracion('sellos_meta', (string)$meta);
+            avisar("Ahora se necesitan {$meta} sellos para un corte gratis.");
+            break;
+
+        case 'club_token':
+            nuevoTokenNfc();
+            avisar('Link del chip renovado. Graba el nuevo link en la etiqueta: el anterior ya no suma sellos.');
             break;
 
         default:

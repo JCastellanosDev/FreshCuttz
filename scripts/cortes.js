@@ -1,127 +1,173 @@
+// Galería de cortes (productos.php → #galeria-cortes).
+// Slider con scroll-snap: swipe nativo en móvil, flechas e indicadores en todos los tamaños.
 var cortes = [
-    {nombre:"Axel sin barba",descripcion:"Antes",  precio:250, foto:"./image/cortes/antes.jpeg",id:1},
-    {nombre:"Axel barbon",descripcion:"Despues", precio:250, foto:"./image/cortes/depues.jpeg", id:2},
-    {nombre:"Axel barbon y largo",descripcion:"Mega despues", precio:250, foto:"./image/cortes/megaD.png", id:8},
-    {nombre:"Nice",descripcion:"nice", precio:250, foto:"./image/cortes/cortesi.jpg", id:4},
-    {nombre:"Clean",descripcion:"ta chilo", precio:250, foto:"./image/cortes/corteM.jpg", id:7},
-    {nombre:"Ta chido",descripcion:"bien loquillo", precio:250, foto:"./image/cortes/diseno-autor.jpg", id:5},
-    {nombre:"Peloon",descripcion:"bien pelon mi compa", precio:250, foto:"./image/cortes/Pelon.jpg", id:6},
-   
-
+    { nombre: "Axel sin barba", descripcion: "Antes", precio: 250, foto: "./image/cortes/antes.jpeg", id: 1 },
+    { nombre: "Axel barbón", descripcion: "Después", precio: 250, foto: "./image/cortes/depues.jpeg", id: 2 },
+    { nombre: "Axel barbón y largo", descripcion: "Mega después", precio: 250, foto: "./image/cortes/megaD.png", id: 8 },
+    { nombre: "Nice", descripcion: "nice", precio: 250, foto: "./image/cortes/cortesi.jpg", id: 4 },
+    { nombre: "Clean", descripcion: "ta chilo", precio: 250, foto: "./image/cortes/corteM.jpg", id: 7 },
+    { nombre: "Ta chido", descripcion: "bien loquillo", precio: 250, foto: "./image/cortes/diseno-autor.jpg", id: 5 },
+    { nombre: "Pelón", descripcion: "bien pelón mi compa", precio: 250, foto: "./image/cortes/Pelon.jpg", id: 6 },
 ];
 
+(function () {
+    const galeria = document.getElementById('galeria-cortes');
+    const controles = document.getElementById('galeria-controles');
+    if (!galeria || !cortes.length) return;
 
+    const icono = (nombre, clases) => window.ui?.icono(nombre, clases) ?? document.createTextNode('');
+    const reducirMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const total = cortes.length;
 
-const carrusel = document.getElementById('carouselExampleIndicators');
+    galeria.setAttribute('role', 'region');
+    galeria.setAttribute('aria-roledescription', 'carrusel');
+    galeria.setAttribute('aria-label', 'Galería de cortes');
 
-if (carrusel && cortes.length > 0) {
-    const contenido = document.createElement('div');
-    contenido.className = 'carousel-inner';
-    const pantallaMovil = window.matchMedia('(max-width: 600px)');
+    const pista = document.createElement('ul');
+    pista.className = 'galeria-pista';
+    pista.tabIndex = 0;
+    pista.setAttribute('aria-label', 'Cortes, usa las flechas del teclado para recorrerlos');
 
     const indicadores = document.createElement('div');
-    indicadores.className = 'carousel-indicators';
+    indicadores.className = 'galeria-indicadores';
+    indicadores.setAttribute('role', 'group');
+    indicadores.setAttribute('aria-label', 'Elegir corte');
 
-   
-    for (let i = 0; i < cortes.length; i++) {
-        const corte = cortes[i];
+    const anuncio = document.createElement('p');
+    anuncio.className = 'sr-only';
+    anuncio.setAttribute('aria-live', 'polite');
 
-        const diapositiva = document.createElement('figure');
-        diapositiva.className = 'carousel-item';
-        diapositiva.hidden = i !== 0;
-        diapositiva.setAttribute('role', 'group');
-        diapositiva.setAttribute('aria-label', `${i + 1} de ${cortes.length}`);
+    cortes.forEach((corte, i) => {
+        const item = document.createElement('li');
+        item.className = 'galeria-item';
+        item.setAttribute('role', 'group');
+        item.setAttribute('aria-roledescription', 'diapositiva');
+        item.setAttribute('aria-label', `${i + 1} de ${total}: ${corte.nombre}`);
 
+        const figura = document.createElement('figure');
         const foto = document.createElement('img');
         foto.src = corte.foto;
-        foto.alt = corte.nombre;
-        foto.loading = 'lazy';
+        foto.alt = `Corte: ${corte.nombre}`;
+        foto.loading = i < 3 ? 'eager' : 'lazy';
         foto.decoding = 'async';
+        foto.draggable = false;
 
-        
-        const informacion = document.createElement('figcaption');
-        const nombre = document.createElement('h2');
+        const pie = document.createElement('figcaption');
+        const nombre = document.createElement('h3');
         nombre.textContent = corte.nombre;
         const contador = document.createElement('span');
-        contador.textContent = `${i + 1} / ${cortes.length}`;
+        contador.className = 'galeria-contador t-num';
+        contador.setAttribute('aria-hidden', 'true');
+        contador.textContent = `${String(i + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+        pie.append(nombre, contador);
 
-      
-        informacion.append(nombre, contador);
-        diapositiva.append(foto, informacion);
-        contenido.appendChild(diapositiva);
+        figura.append(foto, pie);
+        item.append(figura);
+        pista.append(item);
 
-        const indicador = document.createElement('button');
-        indicador.type = 'button';
-        indicador.setAttribute('aria-label', `Ver corte ${i + 1}: ${corte.nombre}`);
-        indicador.addEventListener('click', () => mostrarCorte(i));
-        indicadores.appendChild(indicador);
-    }
-
-    carrusel.replaceChildren(contenido, indicadores);
-
-    const anterior = document.createElement('button');
-    anterior.type = 'button';
-    anterior.className = 'carousel-control-prev';
-    anterior.textContent = '‹';
-    anterior.setAttribute('aria-label', 'Corte anterior');
-
-    const siguiente = document.createElement('button');
-    siguiente.type = 'button';
-    siguiente.className = 'carousel-control-next';
-    siguiente.textContent = '›';
-    siguiente.setAttribute('aria-label', 'Siguiente corte');
-    carrusel.append(anterior, siguiente);
-
-    let corteActual = 0;
-
-   
-    function mostrarCorte(indice) {
-        corteActual = (indice + cortes.length) % cortes.length;
-
-        for (let i = 0; i < cortes.length; i++) {
-            const activo = i === corteActual;
-            contenido.children[i].hidden = pantallaMovil.matches && !activo;
-            contenido.children[i].classList.toggle('active', activo);
-            indicadores.children[i].classList.toggle('active', activo);
-            if (activo) indicadores.children[i].setAttribute('aria-current', 'true');
-            else indicadores.children[i].removeAttribute('aria-current');
-        }
-    }
-
-    anterior.addEventListener('click', () => 
-        mostrarCorte(corteActual - 1));
-    siguiente.addEventListener('click', () => 
-        mostrarCorte(corteActual + 1));
-    carrusel.addEventListener('keydown', (evento) => {
-        if (!pantallaMovil.matches) return;
-        if (evento.key !== 'ArrowLeft' && evento.key !== 'ArrowRight') return;
-        evento.preventDefault();
-        mostrarCorte(corteActual + (evento.key === 'ArrowRight' ? 1 : -1));
+        const punto = document.createElement('button');
+        punto.type = 'button';
+        punto.className = 'galeria-punto';
+        punto.setAttribute('aria-label', `Ver corte ${i + 1}: ${corte.nombre}`);
+        punto.addEventListener('click', () => irA(i, true));
+        indicadores.append(punto);
     });
 
-    function actualizarVista() {
-        if (pantallaMovil.matches) {
-            carrusel.setAttribute('aria-roledescription', 'carrusel');
-            carrusel.tabIndex = 0;
-            contenido.setAttribute('aria-live', 'polite');
-        } else {
-            carrusel.removeAttribute('aria-roledescription');
-            carrusel.removeAttribute('tabindex');
-            contenido.removeAttribute('aria-live');
-        }
-        mostrarCorte(corteActual);
+    galeria.replaceChildren(pista, indicadores, anuncio);
+
+    const crearFlecha = (direccion, etiqueta) => {
+        const boton = document.createElement('button');
+        boton.type = 'button';
+        boton.className = 'btn btn-contorno btn-icono galeria-flecha';
+        boton.setAttribute('aria-label', etiqueta);
+        boton.setAttribute('aria-controls', 'galeria-cortes');
+        boton.append(icono(`chevron-${direccion}`));
+        return boton;
+    };
+    const anterior = crearFlecha('izquierda', 'Corte anterior');
+    const siguiente = crearFlecha('derecha', 'Siguiente corte');
+    anterior.addEventListener('click', () => irA(actual - 1, true));
+    siguiente.addEventListener('click', () => irA(actual + 1, true));
+    if (controles) {
+        controles.replaceChildren(anterior, siguiente);
+        controles.hidden = false;
     }
 
-    let inicioToque = null;
-    contenido.addEventListener('touchstart', (evento) => {
-        inicioToque = evento.touches[0].clientX;
+    const items = [...pista.children];
+    const puntos = [...indicadores.children];
+    let actual = -1;
+    let objetivo = null; // destino elegido con botón o teclado (puede quedar más allá del último alcanzable)
+
+    // Índice máximo al que se puede desplazar (en escritorio caben varias diapositivas).
+    const ultimoAlcanzable = () => {
+        const limite = pista.scrollWidth - pista.clientWidth - 2;
+        const indice = items.findIndex(item => item.offsetLeft - pista.offsetLeft >= limite);
+        return indice === -1 ? total - 1 : indice;
+    };
+
+    function marcar(indice, anunciar) {
+        if (indice === actual) return;
+        actual = indice;
+        puntos.forEach((punto, i) => {
+            const activo = i === indice;
+            punto.classList.toggle('activo', activo);
+            if (activo) punto.setAttribute('aria-current', 'true');
+            else punto.removeAttribute('aria-current');
+        });
+        items.forEach((item, i) => item.classList.toggle('activo', i === indice));
+        anterior.disabled = indice <= 0;
+        siguiente.disabled = indice >= ultimoAlcanzable();
+        if (anunciar) anuncio.textContent = `Corte ${indice + 1} de ${total}: ${cortes[indice].nombre}`;
+    }
+
+    function irA(indice, anunciar) {
+        const destino = Math.max(0, Math.min(indice, total - 1));
+        objetivo = destino;
+        pista.scrollTo({
+            left: items[destino].offsetLeft - pista.offsetLeft,
+            behavior: reducirMovimiento.matches ? 'auto' : 'smooth',
+        });
+        marcar(destino, false);
+        if (anunciar) anuncio.textContent = `Corte ${destino + 1} de ${total}: ${cortes[destino].nombre}`;
+    }
+
+    // Sincroniza el indicador con el desplazamiento (swipe, rueda o trackpad).
+    let pendiente = false;
+    pista.addEventListener('scroll', () => {
+        if (pendiente) return;
+        pendiente = true;
+        requestAnimationFrame(() => {
+            pendiente = false;
+            const izquierda = pista.scrollLeft;
+            let cercano = 0;
+            let distancia = Infinity;
+            items.forEach((item, i) => {
+                const d = Math.abs(item.offsetLeft - pista.offsetLeft - izquierda);
+                if (d < distancia) { distancia = d; cercano = i; }
+            });
+            if (izquierda >= pista.scrollWidth - pista.clientWidth - 2) {
+                cercano = Math.max(cercano, objetivo ?? ultimoAlcanzable());
+            }
+            marcar(cercano, false);
+        });
     }, { passive: true });
-    contenido.addEventListener('touchend', (evento) => {
-        if (!pantallaMovil.matches || inicioToque === null) return;
-        const distancia = inicioToque - evento.changedTouches[0].clientX;
-        if (Math.abs(distancia) > 50) mostrarCorte(corteActual + (distancia > 0 ? 1 : -1));
-        inicioToque = null;
-    }, { passive: true });
-    pantallaMovil.addEventListener('change', actualizarVista);
-    actualizarVista();
-}
+
+    // Un gesto directo del usuario anula el destino elegido con botón.
+    ['pointerdown', 'wheel', 'touchstart'].forEach(tipo =>
+        pista.addEventListener(tipo, () => { objetivo = null; }, { passive: true }));
+
+    pista.addEventListener('keydown', (evento) => {
+        const teclas = { ArrowLeft: actual - 1, ArrowRight: actual + 1, Home: 0, End: total - 1 };
+        if (!(evento.key in teclas)) return;
+        evento.preventDefault();
+        irA(teclas[evento.key], true);
+    });
+
+    window.addEventListener('resize', () => {
+        const indice = actual;
+        actual = -1;
+        marcar(Math.min(indice, ultimoAlcanzable()), false);
+    });
+
+    marcar(0, false);
+})();
